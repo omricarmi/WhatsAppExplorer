@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>WhatsApp ZIP Viewer (fflate, single file)</title>
+<style>
+  :root {
+    --bg: #0f141a;
+    --panel: #121a22;
+    --ink: #e6edf3;
+    --muted: #9fb1c1;
+    --accent: #3aa0ff;
+    --bubble-left: #1f2a36;
+    --bubble-right: #0b5fff1f;
+    --warn: #ffb400;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; background: var(--bg); color: var(--ink); margin: 0; font: 15px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Arial, Noto Sans, "Apple Color Emoji","Segoe UI Emoji"; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Top bar */
+  header {
+    position: sticky; top: 0; z-index: 5;
+    background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0)) , var(--panel);
+    border-bottom: 1px solid #1d2935;
+    padding: 8px 10px 10px 10px;
+  }
+  .bar { display:flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .title { font-weight: 600; opacity:.9; }
+  .file-btn {
+    appearance: none; border: 1px solid #2a3a4b; background: #16202a; color: var(--ink);
+    padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600;
+  }
+  .file-btn:hover { border-color:#3b5168; }
+  input[type="file"] { display:none; }
+  .filename { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; }
+  .sp { flex: 1 1 auto; }
+  .filter-wrap { display:flex; gap:6px; align-items:center; flex:1 1 240px; min-width: 180px; }
+  .filter-input, .jump-date {
+    width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #2a3a4b; background:#0d141b; color: var(--ink);
+  }
+  .jump-date { width: 140px; }
+
+  .dropzone {
+    margin-top: 8px;
+    border: 1px dashed #2a3a4b; border-radius: 10px; padding: 10px;
+    display:flex; gap:8px; align-items:center; color: var(--muted);
+  }
+  .dropzone.drag { border-color: var(--accent); color: var(--ink); background:#0b1220; }
+
+  .stats {
+    display:flex; gap:10px; flex-wrap:wrap; margin-top: 8px; color: var(--muted); font-size: 13px;
+  }
+  .stats b { color: var(--ink); }
+
+  .progress { margin-top: 6px; color: var(--muted); font-size: 13px; min-height: 1.2em; }
+
+  /* Main/chat area */
+  main { height: calc(100dvh - 144px); overflow: auto; padding: 12px; }
+  @media (min-width: 720px) { main { height: calc(100dvh - 116px); } }
+  .chat {
+    max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px;
+  }
+
+  .bubble {
+    width: fit-content; max-width: 92%;
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    background: var(--bubble-left);
+    box-shadow: 0 1px 0 rgba(0,0,0,.2);
+    word-wrap: break-word; overflow-wrap: anywhere;
+  }
+  .bubble.r { margin-left: auto; background: var(--bubble-right); }
+  .meta { display:flex; gap:8px; align-items: baseline; margin-bottom: 4px; }
+  .sender { font-weight: 700; }
+  .time { color: var(--muted); font-size: 12px; }
+  .text { white-space: pre-wrap; }
+  .attachments { display:flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .thumb { max-width: 100%; border-radius: 10px; display:block; }
+  .av { width: 100%; max-width: 520px; }
+  .doc {
+    display:inline-flex; align-items:center; gap:6px; padding: 6px 8px; border-radius: 8px; background:#111a23; border:1px solid #213142;
+  }
+  .badge-missing { display:inline-block; font-size: 12px; color: #111; background: var(--warn); padding: 2px 6px; border-radius: 999px; margin-left: 8px; }
+  .system { opacity:.75; font-style: italic; }
+
+  .sep { position: sticky; top: 44px; z-index: 2; align-self:center; background:#0d141b; color:var(--muted); border:1px solid #263547; padding: 2px 8px; border-radius:999px; font-size:12px; }
+
+  /* Lightbox (optional nice-to-have) */
+  .lightbox {
+    position: fixed; inset: 0; background: rgba(0,0,0,.85);
+    display:none; place-items: center; z-index: 50; padding: 10px;
+  }
+  .lightbox.show { display: grid; }
+  .lightbox-content { max-width: 96vw; max-height: 90vh; }
+  .lightbox video, .lightbox img { max-width: 100%; max-height: 90vh; border-radius: 10px; }
+
+  /* Footer note */
+  footer { padding: 8px 10px 12px; color: var(--muted); font-size: 12px; text-align: center; }
+
+  .tools { display:flex; gap:8px; margin-top:6px; flex-wrap: wrap; }
+  .mini-btn { padding: 4px 8px; border-radius: 6px; border: 1px solid #2a3a4b; background:#0d141b; color:var(--ink); cursor:pointer; }
+  .mini-btn:hover { border-color:#3b5168; }
+  .unparsed-box { display:none; background:#0d141b; border:1px solid #2a3a4b; padding:8px; border-radius:8px; margin-top:6px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <span class="title">WhatsApp “Export Chat” ZIP Viewer</span>
+      <label class="file-btn" id="chooseBtn">Choose ZIP<input id="fileInput" type="file" accept=".zip" /></label>
+      <span class="filename" id="fileName">No file chosen</span>
+      <span class="sp"></span>
+      <div class="filter-wrap">
+        <input id="filterInput" class="filter-input" placeholder="Filter by keyword (sender or text)…" />
+        <input id="jumpDate" class="jump-date" type="date" title="Jump to date" />
+      </div>
+    </div>
+    <div id="dropzone" class="dropzone">Drop a WhatsApp export .zip here (kept local, never uploaded)</div>
+    <div class="tools">
+      <button id="toggleLoose" class="mini-btn" title="Looser parsing mode for quirky exports">Loose Parsing: OFF</button>
+      <button id="showUnparsed" class="mini-btn">Show unparsed sample</button>
+    </div>
+    <div id="stats" class="stats" aria-live="polite"></div>
+    <div id="progress" class="progress" aria-live="polite"></div>
+    <div id="unparsedBox" class="unparsed-box"></div>
+  </header>
+
+  <main>
+    <div id="chat" class="chat" role="list"></div>
+  </main>
+
+  <footer>
+    Built for local use. Uses <a href="https://github.com/101arrowz/fflate" target="_blank" rel="noreferrer">fflate</a> to read ZIPs in the browser. No data leaves your device.
+  </footer>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="lightbox" tabindex="0" aria-modal="true" role="dialog">
+    <div class="lightbox-content" id="lightboxContent"></div>
+  </div>
+
+  <!-- Only allowed external script -->
+  <script src="https://cdn.jsdelivr.net/npm/fflate/umd/index.js"></script>
+  <script>
+  (function () {
+    /*** State ***/
+    let rawFiles = {};
+    let fileIndexByBase = {};
+    let activeURLs = new Set();
+    let messages = [];
+    let filtered = [];
+    let participantsOrder = [];
+    let unparsedLines = [];
+    let looseMode = false;
+
+    const CHUNK_SIZE = 250;
+
+    /*** Elements ***/
+    const fileInput = document.getElementById('fileInput');
+    const chooseBtn = document.getElementById('chooseBtn');
+    const dropzone = document.getElementById('dropzone');
+    const fileNameEl = document.getElementById('fileName');
+    const progressEl = document.getElementById('progress');
+    const statsEl = document.getElementById('stats');
+    const chatEl = document.getElementById('chat');
+    const filterInput = document.getElementById('filterInput');
+    const jumpDateInput = document.getElementById('jumpDate');
+    const lightbox = document.getElementById('lightbox');
+    const lightboxContent = document.getElementById('lightboxContent');
+    const toggleLooseBtn = document.getElementById('toggleLoose');
+    const showUnparsedBtn = document.getElementById('showUnparsed');
+    const unparsedBox = document.getElementById('unparsedBox');
+
+    /*** Utils ***/
+    function resetState() {
+      revokeAllURLs();
+      rawFiles = {};
+      fileIndexByBase = {};
+      messages = [];
+      filtered = [];
+      participantsOrder = [];
+      unparsedLines = [];
+      chatEl.innerHTML = '';
+      statsEl.textContent = '';
+      progressEl.textContent = '';
+      unparsedBox.style.display = 'none';
+      unparsedBox.textContent = '';
+    }
+
+    function setProgress(msg) { progressEl.textContent = msg; }
+
+    function revokeAllURLs() {
+      for (const url of activeURLs) URL.revokeObjectURL(url);
+      activeURLs.clear();
+    }
+
+    function isRTL(s) {
+      const rtlRanges = [/[\u0590-\u05FF]/, /[\u0600-\u06FF]/, /[\u0750-\u077F]/, /[\u08A0-\u08FF]/];
+      return rtlRanges.some(r => r.test(s));
+    }
+
+    function stripMarks(s) {
+      // Remove LRM/RLM/ZW + embedding/override marks + NBSP that iOS often injects
+      return s.replace(/[\u00A0\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '');
+    }
+
+
+    function parseTimestamp(dateStr, timeStr, ampmRaw) {
+      if (!dateStr || !timeStr) return { date: null, iso: (dateStr||'') + ' ' + (timeStr||'') };
+
+      const dsep = /[\/\.-]/;
+      const parts = dateStr.split(dsep);
+      if (parts.length < 3) return { date:null, iso: dateStr + ' ' + timeStr };
+      let d = parseInt(parts[0],10), m = parseInt(parts[1],10) - 1, y = parseInt(parts[2],10);
+      if (parts[2].length === 2) y += (y >= 70 ? 1900 : 2000);
+
+      let hh=0, mm=0, ss=0;
+      const mTime = timeStr.trim().match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?(?:\s*([AP]\.?M\.?))?$/i);
+      if (mTime) {
+        hh = parseInt(mTime[1],10);
+        mm = parseInt(mTime[2],10);
+        ss = mTime[3] ? parseInt(mTime[3],10) : 0;
+        let ampm = (mTime[4] || ampmRaw || '').toUpperCase().replace(/\./g,'');
+        if (ampm) {
+          if (ampm === 'PM' && hh < 12) hh += 12;
+          if (ampm === 'AM' && hh === 12) hh = 0;
+        }
+      } else {
+        return { date:null, iso: dateStr + ' ' + timeStr };
+      }
+      const date = new Date(y, m, d, hh, mm, ss, 0);
+
+      const iso = `${y.toString().padStart(4,'0')}-${(m+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')} ${hh.toString().padStart(2,'0')}:${mm.toString().padStart(2,'0')}`;
+      return isNaN(date.getTime()) ? ({ date:null, iso: dateStr + ' ' + timeStr }) : ({ date, iso });
+    }
+
+    // Core regexes (cover common exports):
+    // Leading bidi/nbsp marks are stripped, but be tolerant anyway
+    const RX_BRACKET = /^[\u200e\u200f\s]*\[(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),\s+(\d{1,2}:\d{2}(?::\d{2})?)(?:\s*([AP]\.?M\.?))?\]\s([^:]+?):\s([\s\S]*)$/i;
+    const RX_DASH    = /^[\u200e\u200f\s]*(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),\s+(\d{1,2}:\d{2}(?::\d{2})?)(?:\s*([AP]\.?M\.?))?\s[-–—]\s([^:]+?):\s([\s\S]*)$/i;
+    const RX_SYSTEM  = /^[\u200e\u200f\s]*(\d{1,2}[\/\.-]\d{1,2}[\/\.-]\d{2,4}),\s+(\d{1,2}:\d{2}(?::\d{2})?)(?:\s*([AP]\.?M\.?))?\s[-–—]\s([\s\S]+)$/i;
+
+
+    // Attachment patterns: explicit placeholder <attached: NAME> OR implicit filename like IMG-*.jpg etc.
+    const RX_ATTACHED_PLACEHOLDER = /[\u200e\u200f\u00A0]*<attached:\s*([^>]+?)>/gi;
+    const RX_FILENAME_LIKE = /\b((?:IMG|VID|PTT|AUD|DOC|STK|WA|V|IMG-)\S+\.(?:jpg|jpeg|png|webp|gif|mp4|mov|webm|m4v|opus|m4a|mp3|ogg|wav|pdf|zip|docx|xlsx|pptx))\b/ig;
+
+    function parseLine(line) {
+      let L = stripMarks(line).trimEnd();
+
+      // Try sender formats
+      let m = L.match(RX_BRACKET);
+      if (!m) m = L.match(RX_DASH);
+      if (m) {
+        const [, dateStr, timeStr, ampm, senderRaw, msgRaw] = m;
+        const { date, iso } = parseTimestamp(dateStr, timeStr, ampm);
+        const sender = senderRaw.trim();
+        let text = msgRaw ?? '';
+
+        const attachments = [];
+        // explicit <attached: NAME>
+        text = text.replace(RX_ATTACHED_PLACEHOLDER, (_, name) => {
+          attachments.push(name.trim());
+          return '';
+        });
+
+        // implicit filenames (only if loose mode enabled or no explicit placeholders)
+        if (looseMode || attachments.length === 0) {
+          const seen = new Set();
+          text = text.replace(RX_FILENAME_LIKE, (fname) => {
+            const base = fname.trim();
+            if (!seen.has(base)) { attachments.push(base); seen.add(base); }
+            return base; // keep the filename text visible too
+          });
+        }
+
+        text = text.trim();
+        return { date, iso, sender, text, attachments, raw: line };
+      }
+
+      // System-only message
+      const s = L.match(RX_SYSTEM);
+      if (s) {
+        const [, dateStr, timeStr, ampm, rest] = s;
+        const { date, iso } = parseTimestamp(dateStr, timeStr, ampm);
+        let text = rest || '';
+        const attachments = [];
+        // Detect placeholders or filenames inside system message
+        text = text.replace(RX_ATTACHED_PLACEHOLDER, (_, name) => { attachments.push(name.trim()); return ''; });
+        if (looseMode || attachments.length === 0) {
+          const seen = new Set();
+          text = text.replace(RX_FILENAME_LIKE, (fname) => {
+            const base = fname.trim();
+            if (!seen.has(base)) { attachments.push(base); seen.add(base); }
+            return base;
+          });
+        }
+        return { date, iso, sender: '', text: text.trim(), attachments, raw: line };
+      }
+
+      return null; // continuation or unknown
+    }
+
+    function classifyMedia(name) {
+      const n = name.toLowerCase();
+      if (/\.(jpg|jpeg|png|webp|gif)$/.test(n)) return { kind: 'image', mime: `image/${n.endsWith('png')?'png':n.endsWith('gif')?'gif':n.endsWith('webp')?'webp':'jpeg'}` };
+      if (/\.(mp4|mov|webm|m4v)$/.test(n)) return { kind: 'video', mime: n.endsWith('webm') ? 'video/webm' : (n.endsWith('mov') ? 'video/quicktime' : 'video/mp4') };
+      if (/\.(opus|m4a|mp3|ogg|wav)$/.test(n)) return { kind: 'audio', mime: n.endsWith('mp3')?'audio/mpeg':n.endsWith('m4a')?'audio/mp4':n.endsWith('opus')?'audio/ogg; codecs=opus':n.endsWith('ogg')?'audio/ogg':n.endsWith('wav')?'audio/wav':'audio/*' };
+      return { kind: 'doc', mime: 'application/octet-stream' };
+    }
+
+    function getBaseName(path) {
+      const i = path.lastIndexOf('/');
+      const j = path.lastIndexOf('\\');
+      const k = Math.max(i, j);
+      return k >= 0 ? path.slice(k + 1) : path;
+    }
+
+    function lazyURLFor(name) {
+      const base = getBaseName(name);
+      const full = fileIndexByBase[base];
+      if (!full) return null;
+      const u8 = rawFiles[full];
+      if (!u8) return null;
+      const { mime } = classifyMedia(base);
+      const blob = new Blob([u8], { type: mime });
+      const url = URL.createObjectURL(blob);
+      activeURLs.add(url);
+      return url;
+    }
+
+    function pickChatTxt(filesMap) {
+      let exact = null;
+      let largest = null, largestSize = -1;
+      for (const name of Object.keys(filesMap)) {
+        const base = getBaseName(name);
+        if (/^chat\.txt$/i.test(base)) { exact = name; break; }
+        if (/\.txt$/i.test(base)) {
+          const size = filesMap[name]?.length || 0;
+          if (size > largestSize) { largest = name; largestSize = size; }
+        }
+      }
+      return exact || largest;
+    }
+
+    function parseChatText(text) {
+      messages = [];
+      unparsedLines = [];
+      participantsOrder = [];
+
+      const lines = text.split(/\r?\n/);
+      let current = null;
+
+      for (let i = 0; i < lines.length; i++) {
+        const rawLine = lines[i];
+        if (!rawLine) continue;
+        const line = rawLine; // keep for unparsed sample display
+
+        const parsed = parseLine(line);
+        if (parsed) {
+          if (parsed.sender && !participantsOrder.includes(parsed.sender)) {
+            participantsOrder.push(parsed.sender);
+          }
+          const searchable = ((parsed.sender||'') + ' ' + (parsed.text||'') + (parsed.attachments.length? (' ' + parsed.attachments.join(' ')) : '')).toLowerCase();
+          messages.push({ ...parsed, searchable });
+          current = messages[messages.length - 1];
+        } else {
+          // continuation of previous message
+          if (current) {
+            current.text += '\\n' + stripMarks(line);
+            current.searchable += ' ' + stripMarks(line).toLowerCase();
+          } else {
+            unparsedLines.push(line);
+          }
+        }
+      }
+    }
+
+    function formatTime(d, iso) {
+      if (!d) return iso || '';
+      const y = d.getFullYear();
+      const m = (d.getMonth() + 1).toString().padStart(2, '0');
+      const dd = d.getDate().toString().padStart(2, '0');
+      const hh = d.getHours().toString().padStart(2, '0');
+      const mm = d.getMinutes().toString().padStart(2, '0');
+      return `${y}-${m}-${dd} ${hh}:${mm}`;
+    }
+
+    function sideFor(sender) {
+      if (participantsOrder.length >= 2) {
+        if (sender === participantsOrder[1]) return 'r';
+        return '';
+      } else if (participantsOrder.length === 1) {
+        return '';
+      }
+      return '';
+    }
+
+    function makeBubble(msg, index) {
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble ' + (msg.sender ? sideFor(msg.sender) : '');
+      bubble.setAttribute('role', 'listitem');
+      if (msg.text && isRTL(msg.text)) bubble.setAttribute('dir', 'rtl');
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      const s = document.createElement('span'); s.className = 'sender'; s.textContent = msg.sender || 'System';
+      const t = document.createElement('span'); t.className = 'time'; t.textContent = formatTime(msg.date, msg.iso);
+      meta.appendChild(s); meta.appendChild(t);
+
+      const textEl = document.createElement('div');
+      textEl.className = 'text';
+      textEl.textContent = msg.text || '';
+
+      bubble.appendChild(meta);
+      if (msg.text) bubble.appendChild(textEl);
+
+      if (msg.attachments && msg.attachments.length) {
+        const wrap = document.createElement('div');
+        wrap.className = 'attachments';
+        for (const name of msg.attachments) {
+          const base = getBaseName(name);
+          const full = fileIndexByBase[base];
+          if (!full) {
+            const miss = document.createElement('div');
+            miss.className = 'doc';
+            const sp = document.createElement('span'); sp.textContent = base + ' ';
+            const badge = document.createElement('span'); badge.className='badge-missing'; badge.textContent='missing file';
+            miss.appendChild(sp); miss.appendChild(badge);
+            wrap.appendChild(miss);
+            continue;
+          }
+          const { kind } = classifyMedia(base);
+          const url = lazyURLFor(base);
+          if (!url) {
+            const miss = document.createElement('div');
+            miss.className = 'doc';
+            const sp = document.createElement('span'); sp.textContent = base + ' ';
+            const badge = document.createElement('span'); badge.className='badge-missing'; badge.textContent='missing file';
+            miss.appendChild(sp); miss.appendChild(badge);
+            wrap.appendChild(miss);
+            continue;
+          }
+
+          if (kind === 'image') {
+            const img = document.createElement('img');
+            img.className = 'thumb';
+            img.loading = 'lazy';
+            img.alt = base;
+            img.src = url;
+            img.addEventListener('click', () => openLightbox('img', url, base));
+            wrap.appendChild(img);
+          } else if (kind === 'video') {
+            const v = document.createElement('video');
+            v.className = 'av';
+            v.controls = true;
+            v.preload = 'metadata';
+            v.src = url;
+            v.addEventListener('click', () => { if (v.paused && v.currentTime === 0) openLightbox('video', url, base); });
+            wrap.appendChild(v);
+          } else if (kind === 'audio') {
+            const a = document.createElement('audio');
+            a.className = 'av';
+            a.controls = true;
+            a.preload = 'metadata';
+            a.src = url;
+            wrap.appendChild(a);
+          } else {
+            const a = document.createElement('a');
+            a.className = 'doc';
+            a.href = url; a.download = base; a.target = '_blank'; a.rel='noreferrer';
+            a.textContent = base;
+            wrap.appendChild(a);
+          }
+        }
+        bubble.appendChild(wrap);
+      }
+
+      bubble.id = 'm-' + index;
+      return bubble;
+    }
+
+    function openLightbox(kind, url, label) {
+      lightboxContent.innerHTML = '';
+      let node;
+      if (kind === 'img') {
+        node = document.createElement('img');
+        node.src = url;
+        node.alt = label;
+      } else {
+        node = document.createElement('video');
+        node.src = url;
+        node.controls = true;
+        node.autoplay = true;
+      }
+      lightboxContent.appendChild(node);
+      lightbox.classList.add('show');
+      lightbox.focus();
+    }
+
+    function closeLightbox() {
+      const media = lightboxContent.querySelector('video');
+      if (media) try { media.pause(); } catch {}
+      lightbox.classList.remove('show');
+      lightboxContent.innerHTML = '';
+    }
+
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox || e.target === lightboxContent) closeLightbox(); });
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
+
+    function updateStats() {
+      let img=0, vid=0, aud=0, doc=0;
+      for (const m of messages) {
+        if (!m.attachments?.length) continue;
+        for (const name of m.attachments) {
+          const base = getBaseName(name);
+          const full = fileIndexByBase[base];
+          if (!full) continue;
+          const { kind } = classifyMedia(base);
+          if (kind === 'image') img++;
+          else if (kind === 'video') vid++;
+          else if (kind === 'audio') aud++;
+          else doc++;
+        }
+      }
+      const parts = [
+        `<b>${messages.length}</b> messages`,
+        img ? `<b>${img}</b> images` : null,
+        vid ? `<b>${vid}</b> videos` : null,
+        aud ? `<b>${aud}</b> audios` : null,
+        doc ? `<b>${doc}</b> docs` : null,
+        unparsedLines.length ? `<span title="Lines that didn’t match known formats"><b>${unparsedLines.length}</b> unparsed lines</span>` : null
+      ].filter(Boolean);
+      statsEl.innerHTML = parts.join(' · ');
+    }
+
+    function destroyChat() {
+      revokeAllURLs();
+      chatEl.innerHTML = '';
+    }
+
+    function renderMessages(list) {
+      destroyChat();
+      let lastDayKey = null;
+      let i = 0;
+      function step() {
+        const frag = document.createDocumentFragment();
+        for (let n = 0; n < CHUNK_SIZE && i < list.length; n++, i++) {
+          const msg = list[i];
+          const dayKey = msg.date ? (msg.date.getFullYear()+"-"+(msg.date.getMonth()+1).toString().padStart(2,'0')+"-"+msg.date.getDate().toString().padStart(2,'0')) : null;
+          if (dayKey && dayKey !== lastDayKey) {
+            const sep = document.createElement('div');
+            sep.className = 'sep';
+            sep.textContent = dayKey;
+            frag.appendChild(sep);
+            lastDayKey = dayKey;
+          }
+          frag.appendChild(makeBubble(msg, i));
+        }
+        chatEl.appendChild(frag);
+        if (i < list.length) {
+          requestAnimationFrame(step);
+        } else {
+          setProgress('');
+        }
+      }
+      setProgress('Rendering messages…');
+      requestAnimationFrame(step);
+    }
+
+    function applyFilter() {
+      const q = (filterInput.value || '').toLowerCase().trim();
+      filtered = !q ? messages : messages.filter(m => m.searchable.includes(q));
+      try { localStorage.setItem('whz_filter', filterInput.value); } catch {}
+      renderMessages(filtered);
+    }
+
+    function jumpToDate() {
+      const val = jumpDateInput.value;
+      if (!val) return;
+      const target = new Date(val + 'T00:00:00');
+      if (isNaN(target.getTime())) return;
+      let idx = filtered.findIndex(m => m.date && m.date >= target);
+      if (idx < 0) idx = filtered.length - 1;
+      const el = document.getElementById('m-' + idx);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    filterInput.addEventListener('input', applyFilter);
+    jumpDateInput.addEventListener('change', jumpToDate);
+
+    toggleLooseBtn.addEventListener('click', () => {
+      looseMode = !looseMode;
+      toggleLooseBtn.textContent = 'Loose Parsing: ' + (looseMode ? 'ON' : 'OFF');
+      if (rawFiles && Object.keys(rawFiles).length) {
+        // Re-run parsing if we already loaded a file
+        rerunParsing();
+      }
+    });
+
+    showUnparsedBtn.addEventListener('click', () => {
+      if (!unparsedLines.length) {
+        unparsedBox.textContent = 'No unparsed lines 🎉';
+      } else {
+        const sample = unparsedLines.slice(0, 40).join('\n');
+        unparsedBox.textContent = sample;
+      }
+      unparsedBox.style.display = unparsedBox.style.display === 'none' ? 'block' : 'none';
+    });
+
+    function rerunParsing() {
+      const chatName = pickChatTxt(rawFiles);
+      if (!chatName) return;
+      let text = '';
+      try {
+        text = window.fflate.strFromU8(rawFiles[chatName]);
+        if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+      } catch (e) {
+        console.error(e);
+        setProgress('Failed to decode Chat.txt as UTF-8.');
+        return;
+      }
+      setProgress('Parsing transcript…');
+      parseChatText(text);
+      updateStats();
+      filtered = messages;
+      if (filterInput.value) filtered = messages.filter(m => m.searchable.includes(filterInput.value.toLowerCase()));
+      renderMessages(filtered);
+    }
+
+    // Persist/restore UI state
+    (function restoreUI() {
+      try {
+        const prevName = localStorage.getItem('whz_zip_name');
+        if (prevName) fileNameEl.textContent = prevName;
+        const prevFilter = localStorage.getItem('whz_filter');
+        if (prevFilter) filterInput.value = prevFilter;
+      } catch {}
+    })();
+
+    /*** File intake ***/
+    chooseBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (f) handleZipFile(f);
+    });
+
+    ;['dragenter','dragover'].forEach(t => dropzone.addEventListener(t, (e) => { e.preventDefault(); e.stopPropagation(); dropzone.classList.add('drag'); }));
+    ;['dragleave','drop'].forEach(t => dropzone.addEventListener(t, (e) => { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('drag'); }));
+    dropzone.addEventListener('drop', (e) => {
+      const f = e.dataTransfer?.files?.[0];
+      if (f) { fileInput.files = e.dataTransfer.files; handleZipFile(f); }
+    });
+
+    async function handleZipFile(file) {
+      resetState();
+      const name = file.name || 'unknown.zip';
+      fileNameEl.textContent = name;
+      try { localStorage.setItem('whz_zip_name', name); } catch {}
+
+      if (!/\.zip$/i.test(name)) {
+        setProgress('Please choose a .zip file.');
+        return;
+      }
+      setProgress('Reading ZIP…');
+
+      let ab;
+      try {
+        ab = await file.arrayBuffer();
+      } catch (e) {
+        console.error(e);
+        setProgress('Failed to read file.');
+        return;
+      }
+
+      setProgress('Unzipping… (client-side)');
+      window.fflate.unzip(new Uint8Array(ab), (err, files) => {
+        if (err) {
+          console.error(err);
+          setProgress('ZIP is corrupted or unsupported.');
+          return;
+        }
+        rawFiles = files || {};
+        fileIndexByBase = {};
+        for (const full of Object.keys(rawFiles)) {
+          const base = getBaseName(full);
+          if (!(base in fileIndexByBase)) fileIndexByBase[base] = full;
+        }
+
+        const chatName = pickChatTxt(rawFiles);
+        if (!chatName) {
+          setProgress('Chat.txt not found (no .txt file in ZIP).');
+          return;
+        }
+
+        rerunParsing(); // decodes + parses + renders
+      });
+    }
+
+    // Clipboard paste
+    document.addEventListener('paste', (e) => {
+      const files = e.clipboardData?.files;
+      if (files && files.length) {
+        const f = files[0];
+        if (/\.zip$/i.test(f.name)) {
+          handleZipFile(f);
+        }
+      }
+    });
+
+  })();
+  </script>
+</body>
+</html>
