@@ -21,15 +21,104 @@
   a { color: var(--accent); text-decoration: none; }
   a:hover { text-decoration: underline; }
 
-  /* Top bar */
+  /* Control Panel */
   header {
     position: sticky; top: 0; z-index: 5;
     background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0)) , var(--panel);
     border-bottom: 1px solid #1d2935;
-    padding: 8px 10px 10px 10px;
+    transition: all 0.3s ease;
   }
-  .bar { display:flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-  .title { font-weight: 600; opacity:.9; }
+  
+  .control-panel {
+    padding: 16px 20px;
+    transition: all 0.3s ease;
+  }
+  
+  .control-panel.minimized {
+    padding: 8px 20px;
+  }
+  
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(45, 57, 72, 0.5);
+  }
+  
+  .panel-header.minimized {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+  
+  .panel-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .title { 
+    font-weight: 600; 
+    font-size: 18px;
+    opacity: 0.9; 
+    margin: 0;
+  }
+  
+  .minimize-btn {
+    background: rgba(22, 32, 42, 0.8);
+    border: 1px solid #2a3a4b;
+    color: var(--ink);
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  
+  .minimize-btn:hover {
+    border-color: #3b5168;
+    background: rgba(26, 37, 47, 0.9);
+  }
+  
+  .panel-content {
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .panel-content.minimized {
+    max-height: 0;
+    opacity: 0;
+  }
+  
+  .section {
+    margin-bottom: 20px;
+  }
+  
+  .section:last-child {
+    margin-bottom: 0;
+  }
+  
+  .section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .bar { 
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 20px; 
+    align-items: center; 
+  }
   .file-btn {
     appearance: none; border: 1px solid #2a3a4b; background: #16202a; color: var(--ink);
     padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600;
@@ -38,35 +127,111 @@
   input[type="file"] { display:none; }
   .filename { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; }
   .sp { flex: 1 1 auto; }
-  .filter-wrap { display:flex; gap:6px; align-items:center; flex:1 1 320px; min-width: 280px; flex-wrap: wrap; }
-  .filter-input, .jump-date, .type-filter, .ext-filter {
-    padding: 8px 10px; border-radius: 8px; border: 1px solid #2a3a4b; background:#0d141b; color: var(--ink);
+  .filter-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 12px;
+    align-items: stretch;
   }
-  .filter-input { flex: 1 1 180px; min-width: 120px; }
-  .jump-date { width: 140px; }
-  .type-filter { width: 120px; }
-  .ext-filter { width: 80px; }
+  
+  @media (max-width: 768px) {
+    .filter-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .filter-input, .type-filter, .ext-filter {
+    padding: 12px 14px; 
+    border-radius: 10px; 
+    border: 1px solid #2a3a4b; 
+    background: #0d141b; 
+    color: var(--ink);
+    font-size: 14px;
+    transition: all 0.2s ease;
+  }
+  
+  .filter-input:focus, .type-filter:focus, .ext-filter:focus {
+    border-color: var(--primary);
+    outline: none;
+    background: #0f1621;
+  }
+  
+  .file-section {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: 16px;
+    align-items: center;
+  }
+  
+  .filename-display {
+    font-size: 13px;
+    color: var(--muted);
+    opacity: 0.8;
+  }
   
   .date-nav { 
-    display:flex; gap:6px; align-items:center; justify-content:center; 
-    margin-top: 8px; padding: 6px 12px; 
-    background: #0d141b; border: 1px solid #2a3a4b; border-radius: 8px;
+    display: grid;
+    grid-template-columns: auto auto 1fr auto auto;
+    gap: 12px;
+    align-items: center;
+    padding: 16px 20px; 
+    background: rgba(13, 20, 27, 0.6); 
+    border: 1px solid #2a3a4b; 
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
   }
-  .date-nav-btn {
-    appearance: none; border: 1px solid #2a3a4b; background: #16202a; color: var(--ink);
-    padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;
-    min-width: 40px;
-  }
-  .date-nav-btn:hover { border-color:#3b5168; background: #1a252f; }
   
-  .date-control { position: relative; margin: 0 8px; }
-  .current-date-btn { 
-    color: var(--ink); font-size: 13px; font-weight: 600; 
-    cursor: pointer; padding: 6px 12px; border-radius: 6px;
-    background: #0d141b; border: 1px solid #2a3a4b;
-    min-width: 120px; text-align: center; display: inline-block;
+  .date-nav-btn {
+    appearance: none; 
+    border: 1px solid #2a3a4b; 
+    background: rgba(22, 32, 42, 0.8); 
+    color: var(--ink);
+    padding: 10px 14px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-size: 14px; 
+    font-weight: 600;
+    min-width: 44px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .current-date-btn:hover { border-color:#3b5168; background: #16202a; }
+  
+  .date-nav-btn:hover { 
+    border-color: #3b5168; 
+    background: rgba(26, 37, 47, 0.9); 
+    transform: translateY(-1px);
+  }
+  
+  .date-control { 
+    position: relative; 
+    justify-self: center;
+    display: flex;
+    align-items: center;
+    min-width: 120px;
+    justify-content: center;
+  }
+  
+  .current-date-btn { 
+    color: var(--ink); 
+    font-size: 14px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    padding: 10px 16px; 
+    border-radius: 8px;
+    background: rgba(22, 32, 42, 0.8);
+    border: 1px solid #2a3a4b;
+    transition: all 0.2s ease;
+    min-width: 140px;
+    text-align: center;
+    display: inline-block;
+  }
+  
+  .current-date-btn:hover { 
+    border-color: #3b5168; 
+    background: rgba(26, 37, 47, 0.9); 
+  }
   
   .date-input-panel {
     position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
@@ -141,8 +306,21 @@
   }
 
   /* Main/chat area - ListView styles */
-  main { height: calc(100dvh - 144px); overflow: auto; padding: 0; }
-  @media (min-width: 720px) { main { height: calc(100dvh - 116px); } }
+  main { 
+    height: calc(100dvh - 200px); 
+    overflow: auto; 
+    padding: 0; 
+    transition: all 0.3s ease;
+  }
+  
+  main.panel-minimized {
+    height: calc(100dvh - 80px);
+  }
+  
+  @media (max-width: 768px) { 
+    main { height: calc(100dvh - 240px); }
+    main.panel-minimized { height: calc(100dvh - 80px); }
+  }
   .chat {
     max-width: 900px; 
     margin: 0 auto; 
@@ -431,60 +609,135 @@
   /* Footer note */
   footer { padding: 8px 10px 12px; color: var(--muted); font-size: 12px; text-align: center; }
 
-  .tools { display:flex; gap:8px; margin-top:6px; flex-wrap: wrap; }
-  .mini-btn { padding: 4px 8px; border-radius: 6px; border: 1px solid #2a3a4b; background:#0d141b; color:var(--ink); cursor:pointer; }
-  .mini-btn:hover { border-color:#3b5168; }
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  
+  .mini-btn { 
+    padding: 10px 16px; 
+    border-radius: 8px; 
+    border: 1px solid #2a3a4b; 
+    background: rgba(22, 32, 42, 0.8); 
+    color: var(--ink); 
+    cursor: pointer; 
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+  
+  .mini-btn:hover { 
+    border-color: #3b5168; 
+    background: rgba(26, 37, 47, 0.9);
+    transform: translateY(-1px);
+  }
+  
+  .dropzone {
+    background: linear-gradient(135deg, rgba(13, 20, 27, 0.4), rgba(22, 32, 42, 0.4));
+    border: 2px dashed #2a3a4b;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+  
+  .dropzone:hover, .dropzone.drag {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, rgba(37, 211, 102, 0.1), rgba(22, 32, 42, 0.6));
+    color: var(--ink);
+  }
   .unparsed-box { display:none; background:#0d141b; border:1px solid #2a3a4b; padding:8px; border-radius:8px; margin-top:6px; white-space: pre-wrap; }
 </style>
 </head>
 <body>
   <header>
-    <div class="bar">
-      <span class="title">WhatsApp “Export Chat” ZIP Viewer</span>
-      <label class="file-btn" id="chooseBtn">Choose ZIP<input id="fileInput" type="file" accept=".zip" /></label>
-      <span class="filename" id="fileName">No file chosen</span>
-      <span class="sp"></span>
-      <div class="filter-wrap">
-        <input id="filterInput" class="filter-input" placeholder="Filter by keyword (sender or text)…" />
-        <select id="typeFilter" class="type-filter" title="Filter by message type">
-          <option value="">All Types</option>
-          <option value="text">Text Only</option>
-          <option value="image">Images</option>
-          <option value="video">Videos</option>
-          <option value="audio">Audio</option>
-          <option value="doc">Documents</option>
-          <option value="mixed">Mixed Media</option>
-        </select>
-        <input id="extFilter" class="ext-filter" placeholder="ext" title="Filter by file extension (e.g. jpg, pdf)" />
+    <div class="control-panel" id="controlPanel">
+      <div class="panel-header" id="panelHeader">
+        <div class="panel-title">
+          <h1 class="title">WhatsApp Chat Viewer</h1>
+          <span class="filename-display" id="fileName">No file chosen</span>
+        </div>
+        <button class="minimize-btn" id="minimizeBtn">
+          <span id="minimizeIcon">⌄</span>
+          <span id="minimizeText">Minimize</span>
+        </button>
       </div>
-    </div>
-    <div id="dropzone" class="dropzone">Drop a WhatsApp export .zip here (kept local, never uploaded)</div>
-    <div class="date-nav">
-      <button id="backWeek" class="date-nav-btn" title="Go back 1 week">◀◀</button>
-      <button id="back3Days" class="date-nav-btn" title="Go back 3 days">◀</button>
-      <div class="date-control">
-        <span id="currentDate" class="current-date-btn" title="Click to enter specific date">-</span>
-        <div id="dateInputPanel" class="date-input-panel" style="display: none;">
-          <input id="jumpDate" class="jump-date-input" type="date" title="Select date from calendar" />
-          <div class="date-input-buttons">
-            <button id="jumpGoBtn" class="date-input-btn" title="Jump to date">Go</button>
-            <button id="jumpCancelBtn" class="date-input-btn cancel" title="Cancel">✕</button>
+      
+      <div class="panel-content" id="panelContent">
+        <div class="section">
+          <div class="section-title">File Import</div>
+          <div class="file-section">
+            <label class="file-btn" id="chooseBtn">
+              Choose ZIP
+              <input id="fileInput" type="file" accept=".zip" />
+            </label>
+            <div id="dropzone" class="dropzone">
+              Drop WhatsApp export .zip here (kept local, never uploaded)
+            </div>
           </div>
         </div>
+
+        <div class="section">
+          <div class="section-title">Search & Filter</div>
+          <div class="filter-grid">
+            <input id="filterInput" class="filter-input" placeholder="Filter by keyword (sender or text)…" />
+            <select id="typeFilter" class="type-filter" title="Filter by message type">
+              <option value="">All Types</option>
+              <option value="text">Text Only</option>
+              <option value="image">Images</option>
+              <option value="video">Videos</option>
+              <option value="audio">Audio</option>
+              <option value="doc">Documents</option>
+              <option value="mixed">Mixed Media</option>
+            </select>
+            <input id="extFilter" class="ext-filter" placeholder="File extension" title="Filter by file extension (e.g. jpg, pdf)" />
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Navigation</div>
+          <div class="date-nav">
+            <button id="backWeek" class="date-nav-btn" title="Go back 1 week">◀◀</button>
+            <button id="back3Days" class="date-nav-btn" title="Go back 3 days">◀</button>
+            <div class="date-control">
+              <span id="currentDate" class="current-date-btn" title="Click to enter specific date">-</span>
+              <div id="dateInputPanel" class="date-input-panel" style="display: none;">
+                <input id="jumpDate" class="jump-date-input" type="date" title="Select date from calendar" />
+                <div class="date-input-buttons">
+                  <button id="jumpGoBtn" class="date-input-btn" title="Jump to date">Go</button>
+                  <button id="jumpCancelBtn" class="date-input-btn cancel" title="Cancel">✕</button>
+                </div>
+              </div>
+            </div>
+            <button id="next3Days" class="date-nav-btn" title="Go forward 3 days">▶</button>
+            <button id="nextWeek" class="date-nav-btn" title="Go forward 1 week">▶▶</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Advanced Options</div>
+          <div class="tools-grid">
+            <button id="toggleLoose" class="mini-btn" title="Looser parsing mode for quirky exports">Loose Parsing: OFF</button>
+            <button id="showUnparsed" class="mini-btn">Show Unparsed Sample</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div id="stats" class="stats" aria-live="polite"></div>
+          <div id="progress" class="progress" aria-live="polite"></div>
+          <div id="progressBarContainer" class="progress-bar-container">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <div id="unparsedBox" class="unparsed-box"></div>
+        </div>
       </div>
-      <button id="next3Days" class="date-nav-btn" title="Go forward 3 days">▶</button>
-      <button id="nextWeek" class="date-nav-btn" title="Go forward 1 week">▶▶</button>
     </div>
-    <div class="tools">
-      <button id="toggleLoose" class="mini-btn" title="Looser parsing mode for quirky exports">Loose Parsing: OFF</button>
-      <button id="showUnparsed" class="mini-btn">Show unparsed sample</button>
-    </div>
-    <div id="stats" class="stats" aria-live="polite"></div>
-    <div id="progress" class="progress" aria-live="polite"></div>
-    <div id="progressBarContainer" class="progress-bar-container">
-      <div id="progressBar" class="progress-bar"></div>
-    </div>
-    <div id="unparsedBox" class="unparsed-box"></div>
   </header>
 
   <main>
@@ -2276,6 +2529,50 @@
       applyFilter(); // Use applyFilter to handle all current filter settings
     }
 
+
+    // Control Panel Minimize/Expand functionality
+    const minimizeBtn = document.getElementById('minimizeBtn');
+    const controlPanel = document.getElementById('controlPanel');
+    const panelHeader = document.getElementById('panelHeader');
+    const panelContent = document.getElementById('panelContent');
+    const minimizeIcon = document.getElementById('minimizeIcon');
+    const minimizeText = document.getElementById('minimizeText');
+    
+    let isMinimized = false;
+    
+    minimizeBtn.addEventListener('click', () => {
+      isMinimized = !isMinimized;
+      const mainEl = document.querySelector('main');
+      
+      if (isMinimized) {
+        controlPanel.classList.add('minimized');
+        panelHeader.classList.add('minimized');
+        panelContent.classList.add('minimized');
+        mainEl.classList.add('panel-minimized');
+        minimizeIcon.textContent = '⌃';
+        minimizeText.textContent = 'Expand';
+      } else {
+        controlPanel.classList.remove('minimized');
+        panelHeader.classList.remove('minimized');
+        panelContent.classList.remove('minimized');
+        mainEl.classList.remove('panel-minimized');
+        minimizeIcon.textContent = '⌄';
+        minimizeText.textContent = 'Minimize';
+      }
+      
+      // Save state to localStorage
+      try {
+        localStorage.setItem('whz_panel_minimized', isMinimized);
+      } catch {}
+    });
+    
+    // Restore minimize state on load
+    try {
+      const savedState = localStorage.getItem('whz_panel_minimized');
+      if (savedState === 'true') {
+        minimizeBtn.click();
+      }
+    } catch {}
 
     /*** File intake ***/
     // chooseBtn click handler removed - native label behavior handles file picker opening
