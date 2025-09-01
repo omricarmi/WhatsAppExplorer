@@ -38,11 +38,59 @@
   input[type="file"] { display:none; }
   .filename { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40vw; }
   .sp { flex: 1 1 auto; }
-  .filter-wrap { display:flex; gap:6px; align-items:center; flex:1 1 240px; min-width: 180px; }
-  .filter-input, .jump-date {
-    width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid #2a3a4b; background:#0d141b; color: var(--ink);
+  .filter-wrap { display:flex; gap:6px; align-items:center; flex:1 1 320px; min-width: 280px; flex-wrap: wrap; }
+  .filter-input, .jump-date, .type-filter, .ext-filter {
+    padding: 8px 10px; border-radius: 8px; border: 1px solid #2a3a4b; background:#0d141b; color: var(--ink);
   }
+  .filter-input { flex: 1 1 180px; min-width: 120px; }
   .jump-date { width: 140px; }
+  .type-filter { width: 120px; }
+  .ext-filter { width: 80px; }
+  
+  .date-nav { 
+    display:flex; gap:6px; align-items:center; justify-content:center; 
+    margin-top: 8px; padding: 6px 12px; 
+    background: #0d141b; border: 1px solid #2a3a4b; border-radius: 8px;
+  }
+  .date-nav-btn {
+    appearance: none; border: 1px solid #2a3a4b; background: #16202a; color: var(--ink);
+    padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;
+    min-width: 40px;
+  }
+  .date-nav-btn:hover { border-color:#3b5168; background: #1a252f; }
+  
+  .date-control { position: relative; margin: 0 8px; }
+  .current-date-btn { 
+    color: var(--ink); font-size: 13px; font-weight: 600; 
+    cursor: pointer; padding: 6px 12px; border-radius: 6px;
+    background: #0d141b; border: 1px solid #2a3a4b;
+    min-width: 120px; text-align: center; display: inline-block;
+  }
+  .current-date-btn:hover { border-color:#3b5168; background: #16202a; }
+  
+  .date-input-panel {
+    position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    background: #0d141b; border: 1px solid #3b5168; border-radius: 8px;
+    padding: 8px; margin-top: 4px; min-width: 200px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 10;
+  }
+  
+  .jump-date-input {
+    width: 100%; margin-bottom: 6px;
+    padding: 8px; border-radius: 4px; border: 1px solid #2a3a4b; 
+    background:#16202a; color: var(--ink); font-size: 13px;
+  }
+  .jump-date-input:focus {
+    border-color: #3b5168; outline: none; background: #1a252f;
+  }
+  
+  .date-input-buttons { display: flex; gap: 4px; }
+  .date-input-btn {
+    flex: 1; padding: 4px 8px; border-radius: 4px; border: 1px solid #2a3a4b;
+    background: #16202a; color: var(--ink); cursor: pointer; font-size: 12px; font-weight: 600;
+  }
+  .date-input-btn:hover { border-color: #3b5168; background: #1a252f; }
+  .date-input-btn.cancel:hover { border-color: #ff6b6b; background: #2a1616; }
 
   .dropzone {
     margin-top: 8px;
@@ -58,36 +106,275 @@
 
   .progress { margin-top: 6px; color: var(--muted); font-size: 13px; min-height: 1.2em; }
 
-  /* Main/chat area */
-  main { height: calc(100dvh - 144px); overflow: auto; padding: 12px; }
+  /* Main/chat area - ListView styles */
+  main { height: calc(100dvh - 144px); overflow: auto; padding: 0; }
   @media (min-width: 720px) { main { height: calc(100dvh - 116px); } }
   .chat {
-    max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px;
+    max-width: 900px; 
+    margin: 0 auto; 
+    height: 100%;
+    position: relative;
+    background: var(--bg);
   }
 
-  .bubble {
-    width: fit-content; max-width: 92%;
-    border-radius: var(--radius);
-    padding: 8px 10px;
-    background: var(--bubble-left);
-    box-shadow: 0 1px 0 rgba(0,0,0,.2);
-    word-wrap: break-word; overflow-wrap: anywhere;
+  /* WhatsApp-style ListView Items */
+  .list-item {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 16px;
+    background: transparent;
+    min-height: auto;
+    word-wrap: break-word; 
+    overflow-wrap: anywhere;
+    position: relative;
   }
-  .bubble.r { margin-left: auto; background: var(--bubble-right); }
-  .meta { display:flex; gap:8px; align-items: baseline; margin-bottom: 4px; }
-  .sender { font-weight: 700; }
-  .time { color: var(--muted); font-size: 12px; }
-  .text { white-space: pre-wrap; }
-  .attachments { display:flex; flex-direction: column; gap: 6px; margin-top: 6px; }
-  .thumb { max-width: 100%; border-radius: 10px; display:block; }
-  .av { width: 100%; max-width: 520px; }
-  .doc {
-    display:inline-flex; align-items:center; gap:6px; padding: 6px 8px; border-radius: 8px; background:#111a23; border:1px solid #213142;
+  
+  .list-item.highlighted {
+    background: rgba(0,150,255,0.1);
+    animation: highlight-fade 3s ease-out;
   }
-  .badge-missing { display:inline-block; font-size: 12px; color: #111; background: var(--warn); padding: 2px 6px; border-radius: 999px; margin-left: 8px; }
-  .system { opacity:.75; font-style: italic; }
+  
+  @keyframes highlight-fade {
+    0% { background: rgba(0,150,255,0.2); }
+    100% { background: transparent; }
+  }
 
-  .sep { position: sticky; top: 44px; z-index: 2; align-self:center; background:#0d141b; color:var(--muted); border:1px solid #263547; padding: 2px 8px; border-radius:999px; font-size:12px; }
+  /* Message Bubble Container */
+  .message-bubble {
+    display: flex;
+    flex-direction: column;
+    max-width: 75%;
+    margin: 4px 0;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: var(--bubble-left, #2d3748);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    position: relative;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+  
+  /* Right-aligned messages (sent by main user) */
+  .message-bubble.sent {
+    align-self: flex-end;
+    background: var(--bubble-right, #25d366);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  
+  /* Left-aligned messages (received) */
+  .message-bubble.received {
+    align-self: flex-start;
+    background: var(--bubble-left, #2d3748);
+    color: var(--text, #e8eaed);
+    border-bottom-left-radius: 4px;
+  }
+  
+  /* System messages */
+  .message-bubble.system {
+    align-self: center;
+    background: rgba(255,255,255,0.1);
+    color: var(--muted);
+    font-style: italic;
+    font-size: 13px;
+    border-radius: 16px;
+    padding: 6px 12px;
+    max-width: 80%;
+    text-align: center;
+  }
+
+  /* Message Header */
+  .message-header {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: baseline; 
+    margin-bottom: 4px;
+    gap: 12px;
+  }
+  
+  .message-sender { 
+    font-weight: 600; 
+    font-size: 13px;
+    color: var(--accent, #25d366);
+    flex-shrink: 0;
+  }
+  
+  .sent .message-sender {
+    color: rgba(255,255,255,0.9);
+  }
+  
+  .message-time { 
+    color: rgba(255,255,255,0.7); 
+    font-size: 11px; 
+    flex-shrink: 0;
+    font-weight: 400;
+  }
+  
+  .received .message-time {
+    color: var(--muted, #a0a0a0);
+  }
+  
+  /* Message Text */
+  .message-text { 
+    white-space: pre-wrap; 
+    line-height: 1.4;
+    font-size: 14px;
+    margin: 0;
+  }
+  
+  .message-text:empty {
+    display: none;
+  }
+
+  /* Hide system message header */
+  .system .message-header {
+    display: none;
+  }
+  
+  .system .message-text {
+    font-size: 13px;
+    text-align: center;
+  }
+
+  /* WhatsApp-style Attachment Styles */
+  .message-attachments {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  /* Image Attachments */
+  .attachment-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-top: 4px;
+  }
+  
+  .attachment-thumb { 
+    max-width: 150px;
+    max-height: 150px;
+    min-width: 100px;
+    min-height: 100px;
+    border-radius: 8px; 
+    display: block;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    object-fit: cover;
+    background: rgba(255,255,255,0.1);
+  }
+  
+  .attachment-thumb:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Single image can be larger */
+  .attachment-images:has(:only-child) .attachment-thumb {
+    max-width: 200px;
+    max-height: 200px;
+  }
+  
+  /* Video Attachments */
+  .attachment-videos {
+    margin-top: 4px;
+  }
+  
+  .attachment-video { 
+    max-width: 200px;
+    max-height: 150px;
+    width: 100%;
+    border-radius: 8px;
+    background: rgba(0,0,0,0.8);
+  }
+  
+  /* Audio Attachments */
+  .attachment-audios {
+    margin-top: 4px;
+  }
+  
+  .attachment-audio { 
+    max-width: 250px;
+    width: 100%;
+    height: 32px;
+  }
+  
+  /* Document Attachments */
+  .attachment-docs {
+    margin-top: 4px;
+  }
+  
+  .attachment-doc {
+    display: inline-flex; 
+    align-items: center; 
+    gap: 8px; 
+    padding: 8px 12px; 
+    border-radius: 8px; 
+    background: rgba(255,255,255,0.1); 
+    color: var(--text);
+    text-decoration: none;
+    font-size: 13px;
+    transition: background-color 0.2s ease;
+    max-width: 200px;
+    overflow: hidden;
+  }
+  
+  .attachment-doc:hover {
+    background: rgba(255,255,255,0.15);
+    color: var(--text);
+  }
+  
+  .attachment-doc::before {
+    content: "📄";
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  
+  /* Missing File Styles */
+  .attachment-missing {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: rgba(244,67,54,0.2);
+    border-radius: 6px;
+    font-size: 12px;
+    color: #ff9999;
+  }
+  
+  .missing-badge { 
+    display: inline-block; 
+    font-size: 10px; 
+    color: #fff; 
+    background: #f44336; 
+    padding: 2px 6px; 
+    border-radius: 8px;
+    font-weight: 500;
+  }
+  
+  /* Media with text adjustments */
+  .message-bubble:has(.message-attachments) .message-text:not(:empty) {
+    margin-bottom: 4px;
+  }
+  
+  /* Attachment-only messages */
+  .message-bubble:has(.message-attachments) .message-text:empty + .message-attachments {
+    margin-top: 0;
+  }
+
+  /* Legacy bubble styles (hidden for now) */
+  .bubble { display: none; }
+  .meta { display: none; }
+  .sender { display: none; }
+  .time { display: none; }
+  .text { display: none; }
+  .attachments { display: none; }
+  .thumb { display: none; }
+  .av { display: none; }
+  .doc { display: none; }
+  .badge-missing { display: none; }
+  .system { display: none; }
+  .sep { display: none; }
 
   /* Lightbox (optional nice-to-have) */
   .lightbox {
@@ -116,10 +403,35 @@
       <span class="sp"></span>
       <div class="filter-wrap">
         <input id="filterInput" class="filter-input" placeholder="Filter by keyword (sender or text)…" />
-        <input id="jumpDate" class="jump-date" type="date" title="Jump to date" />
+        <select id="typeFilter" class="type-filter" title="Filter by message type">
+          <option value="">All Types</option>
+          <option value="text">Text Only</option>
+          <option value="image">Images</option>
+          <option value="video">Videos</option>
+          <option value="audio">Audio</option>
+          <option value="doc">Documents</option>
+          <option value="mixed">Mixed Media</option>
+        </select>
+        <input id="extFilter" class="ext-filter" placeholder="ext" title="Filter by file extension (e.g. jpg, pdf)" />
       </div>
     </div>
     <div id="dropzone" class="dropzone">Drop a WhatsApp export .zip here (kept local, never uploaded)</div>
+    <div class="date-nav">
+      <button id="backWeek" class="date-nav-btn" title="Go back 1 week">◀◀</button>
+      <button id="back3Days" class="date-nav-btn" title="Go back 3 days">◀</button>
+      <div class="date-control">
+        <span id="currentDate" class="current-date-btn" title="Click to enter specific date">-</span>
+        <div id="dateInputPanel" class="date-input-panel" style="display: none;">
+          <input id="jumpDate" class="jump-date-input" type="date" title="Select date from calendar" />
+          <div class="date-input-buttons">
+            <button id="jumpGoBtn" class="date-input-btn" title="Jump to date">Go</button>
+            <button id="jumpCancelBtn" class="date-input-btn cancel" title="Cancel">✕</button>
+          </div>
+        </div>
+      </div>
+      <button id="next3Days" class="date-nav-btn" title="Go forward 3 days">▶</button>
+      <button id="nextWeek" class="date-nav-btn" title="Go forward 1 week">▶▶</button>
+    </div>
     <div class="tools">
       <button id="toggleLoose" class="mini-btn" title="Looser parsing mode for quirky exports">Loose Parsing: OFF</button>
       <button id="showUnparsed" class="mini-btn">Show unparsed sample</button>
@@ -146,15 +458,935 @@
   <script src="https://cdn.jsdelivr.net/npm/fflate/umd/index.js"></script>
   <script>
   (function () {
-    /*** State ***/
+    /*** Android ListView Pattern Implementation ***/
+    
+    // Data Source Layer - Manages all message data
+    class ChatDataSource {
+      constructor() {
+        this.messages = [];
+        this.filtered = [];
+        this.observers = [];
+        this.dateIndex = new Map(); // date -> array of positions
+        this.idIndex = new Map();   // id -> position
+      }
+      
+      setMessages(messages) {
+        this.messages = messages.map((msg, index) => ({
+          ...msg,
+          id: this.generateStableId(msg, index),
+          originalIndex: index
+        }));
+        this.filtered = [...this.messages];
+        this.rebuildIndexes();
+        this.notifyDataSetChanged();
+      }
+      
+      generateStableId(msg, index) {
+        // Create stable ID from content hash + timestamp
+        const content = (msg.text || '') + (msg.sender || '') + (msg.iso || index);
+        return this.hashCode(content);
+      }
+      
+      hashCode(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+          const char = str.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash; // Convert to 32-bit integer
+        }
+        return Math.abs(hash);
+      }
+      
+      rebuildIndexes() {
+        this.dateIndex.clear();
+        this.idIndex.clear();
+        
+        this.filtered.forEach((msg, position) => {
+          // Index by date
+          if (msg.date) {
+            const dateKey = this.getDateKey(msg.date);
+            if (!this.dateIndex.has(dateKey)) {
+              this.dateIndex.set(dateKey, []);
+            }
+            this.dateIndex.get(dateKey).push(position);
+          }
+          
+          // Index by ID
+          this.idIndex.set(msg.id, position);
+        });
+      }
+      
+      getDateKey(date) {
+        return date.toISOString().split('T')[0]; // YYYY-MM-DD
+      }
+      
+      applyFilter(predicate) {
+        this.filtered = this.messages.filter(predicate);
+        this.rebuildIndexes();
+        this.notifyDataSetChanged();
+      }
+      
+      getCount() {
+        return this.filtered.length;
+      }
+      
+      getItem(position) {
+        return this.filtered[position];
+      }
+      
+      getItemId(position) {
+        const item = this.getItem(position);
+        return item ? item.id : position;
+      }
+      
+      findPositionByDate(targetDate) {
+        const targetKey = this.getDateKey(targetDate);
+        const positions = this.dateIndex.get(targetKey);
+        return positions && positions.length > 0 ? positions[0] : -1;
+      }
+      
+      findPositionNearDate(targetDate) {
+        let bestPosition = -1;
+        let minDiff = Infinity;
+        
+        for (let i = 0; i < this.filtered.length; i++) {
+          const msg = this.filtered[i];
+          if (!msg.date) continue;
+          
+          const diff = Math.abs(msg.date.getTime() - targetDate.getTime());
+          if (diff < minDiff) {
+            minDiff = diff;
+            bestPosition = i;
+          }
+        }
+        
+        return bestPosition;
+      }
+      
+      registerObserver(observer) {
+        this.observers.push(observer);
+      }
+      
+      unregisterObserver(observer) {
+        const index = this.observers.indexOf(observer);
+        if (index > -1) {
+          this.observers.splice(index, 1);
+        }
+      }
+      
+      notifyDataSetChanged() {
+        this.observers.forEach(observer => {
+          if (observer.onDataSetChanged) {
+            observer.onDataSetChanged();
+          }
+        });
+      }
+    }
+
+    // Adapter Layer - Bridges data and views
+    class ChatAdapter {
+      constructor(dataSource) {
+        this.dataSource = dataSource;
+        this.recycledViews = new Map(); // viewType -> array of views
+        this.viewTypes = {
+          TEXT: 0,
+          IMAGE: 1,
+          VIDEO: 2,
+          AUDIO: 3,
+          DOCUMENT: 4,
+          SYSTEM: 5
+        };
+      }
+      
+      getCount() {
+        return this.dataSource.getCount();
+      }
+      
+      getItem(position) {
+        return this.dataSource.getItem(position);
+      }
+      
+      getItemId(position) {
+        return this.dataSource.getItemId(position);
+      }
+      
+      getItemViewType(position) {
+        const item = this.getItem(position);
+        if (!item) return this.viewTypes.TEXT;
+        
+        if (!item.sender) return this.viewTypes.SYSTEM;
+        
+        if (item.attachments && item.attachments.length > 0) {
+          const hasImage = item.attachments.some(name => this.isImageFile(name));
+          const hasVideo = item.attachments.some(name => this.isVideoFile(name));
+          const hasAudio = item.attachments.some(name => this.isAudioFile(name));
+          
+          if (hasImage) return this.viewTypes.IMAGE;
+          if (hasVideo) return this.viewTypes.VIDEO;
+          if (hasAudio) return this.viewTypes.AUDIO;
+          return this.viewTypes.DOCUMENT;
+        }
+        
+        return this.viewTypes.TEXT;
+      }
+      
+      isImageFile(filename) {
+        const ext = filename.toLowerCase().split('.').pop();
+        return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(ext);
+      }
+      
+      isVideoFile(filename) {
+        const ext = filename.toLowerCase().split('.').pop();
+        return ['mp4', 'webm', 'mov', 'avi', 'mkv', '3gp'].includes(ext);
+      }
+      
+      isAudioFile(filename) {
+        const ext = filename.toLowerCase().split('.').pop();
+        return ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'opus'].includes(ext);
+      }
+      
+      getView(position, convertView, parent) {
+        const viewType = this.getItemViewType(position);
+        const item = this.getItem(position);
+        
+        // Try to reuse existing view of same type
+        let view = this.getRecycledView(viewType);
+        if (!view) {
+          view = this.createView(viewType);
+        }
+        
+        // Bind data to view
+        this.bindView(view, item, position);
+        
+        return view;
+      }
+      
+      createView(viewType) {
+        const view = document.createElement('div');
+        view.className = 'list-item';
+        view.setAttribute('role', 'listitem');
+        view.dataset.viewType = viewType;
+        
+        if (viewType === this.viewTypes.SYSTEM) {
+          // System message layout
+          view.innerHTML = `
+            <div class="message-bubble system">
+              <div class="message-header">
+                <span class="message-time"></span>
+              </div>
+              <div class="message-text"></div>
+            </div>
+          `;
+        } else {
+          // Regular message bubble layout
+          view.innerHTML = `
+            <div class="message-bubble">
+              <div class="message-header">
+                <span class="message-sender"></span>
+                <span class="message-time"></span>
+              </div>
+              <div class="message-text"></div>
+              <div class="message-attachments">
+                <div class="attachment-images"></div>
+                <div class="attachment-videos"></div>
+                <div class="attachment-audios"></div>
+                <div class="attachment-docs"></div>
+              </div>
+            </div>
+          `;
+        }
+        
+        return view;
+      }
+      
+      bindView(view, item, position) {
+        if (!item) return;
+        
+        // Update data attributes
+        view.dataset.position = position;
+        view.dataset.messageId = item.id;
+        view.dataset.originalIndex = item.originalIndex;
+        
+        const bubble = view.querySelector('.message-bubble');
+        const sender = view.querySelector('.message-sender');
+        const time = view.querySelector('.message-time');
+        const textEl = view.querySelector('.message-text');
+        
+        // Determine message alignment (sent vs received)
+        const isSystemMessage = !item.sender;
+        if (!isSystemMessage && bubble) {
+          const isSent = this.isMessageSent(item.sender);
+          bubble.className = isSent ? 'message-bubble sent' : 'message-bubble received';
+        }
+        
+        // Update sender and time
+        if (sender) sender.textContent = item.sender || 'System';
+        if (time) time.textContent = this.formatTime(item.date, item.iso);
+        
+        // Update text content
+        if (textEl) {
+          textEl.textContent = item.text || '';
+          if (item.text && this.isRTL(item.text)) {
+            textEl.setAttribute('dir', 'rtl');
+          } else {
+            textEl.removeAttribute('dir');
+          }
+        }
+        
+        // Handle attachments
+        this.bindAttachments(view, item);
+        
+        // Hide empty attachment containers
+        this.hideEmptyAttachmentContainers(view);
+      }
+      
+      isMessageSent(sender) {
+        // Determine if message is sent by the main user
+        // In WhatsApp exports, typically the second participant is the main user
+        if (participantsOrder.length >= 2) {
+          return sender === participantsOrder[1];
+        }
+        // Fallback: if only one participant, assume they're the main user
+        return participantsOrder.length === 1 && sender === participantsOrder[0];
+      }
+      
+      hideEmptyAttachmentContainers(view) {
+        const attachmentContainers = view.querySelectorAll('.attachment-images, .attachment-videos, .attachment-audios, .attachment-docs');
+        attachmentContainers.forEach(container => {
+          container.style.display = container.children.length > 0 ? 'flex' : 'none';
+        });
+        
+        // Hide main attachment container if all sub-containers are empty
+        const mainContainer = view.querySelector('.message-attachments');
+        if (mainContainer) {
+          const hasAnyAttachments = Array.from(attachmentContainers).some(container => container.children.length > 0);
+          mainContainer.style.display = hasAnyAttachments ? 'flex' : 'none';
+        }
+      }
+      
+      bindAttachments(view, item) {
+        // Clear existing attachments
+        const attachmentContainers = view.querySelectorAll('.attachment-images, .attachment-videos, .attachment-audios, .attachment-docs');
+        attachmentContainers.forEach(container => container.innerHTML = '');
+        
+        if (!item.attachments || item.attachments.length === 0) {
+          return;
+        }
+        
+        for (const attachmentName of item.attachments) {
+          const base = this.getBaseName(attachmentName);
+          const full = fileIndexByBase[base]; // Legacy reference
+          
+          if (!full) {
+            this.createMissingAttachment(view, base);
+            continue;
+          }
+          
+          if (this.isImageFile(base)) {
+            this.createImageAttachment(view, base);
+          } else if (this.isVideoFile(base)) {
+            this.createVideoAttachment(view, base);
+          } else if (this.isAudioFile(base)) {
+            this.createAudioAttachment(view, base);
+          } else {
+            this.createDocumentAttachment(view, base);
+          }
+        }
+      }
+      
+      createImageAttachment(view, filename) {
+        const container = view.querySelector('.attachment-images');
+        if (!container) return;
+        
+        const img = document.createElement('img');
+        img.className = 'attachment-thumb';
+        img.loading = 'lazy';
+        img.alt = filename;
+        img.dataset.src = this.getFileURL(filename); // Lazy loading
+        img.addEventListener('click', () => this.openLightbox('img', this.getFileURL(filename), filename));
+        
+        // Use intersection observer for lazy loading
+        this.setupLazyLoading(img);
+        container.appendChild(img);
+      }
+      
+      createVideoAttachment(view, filename) {
+        const container = view.querySelector('.attachment-videos');
+        if (!container) return;
+        
+        const video = document.createElement('video');
+        video.className = 'attachment-video';
+        video.controls = true;
+        video.preload = 'metadata';
+        video.src = this.getFileURL(filename);
+        video.dataset.filename = filename; // Store filename for sync
+        video.style.cssText = `
+          max-width: 280px;
+          max-height: 200px;
+          width: auto;
+          height: auto;
+          border-radius: 8px;
+        `;
+        video.addEventListener('click', (e) => { 
+          e.preventDefault();
+          // Get current video state
+          const currentTime = video.currentTime || 0;
+          const wasPaused = video.paused;
+          // Pause thumbnail video
+          if (!video.paused) video.pause();
+          // Open lightbox with current state
+          this.openLightboxWithState('video', this.getFileURL(filename), filename, currentTime, wasPaused);
+        });
+        container.appendChild(video);
+      }
+      
+      createAudioAttachment(view, filename) {
+        const container = view.querySelector('.attachment-audios');
+        if (!container) return;
+        
+        const audio = document.createElement('audio');
+        audio.className = 'attachment-audio';
+        audio.controls = true;
+        audio.preload = 'metadata';
+        audio.src = this.getFileURL(filename);
+        container.appendChild(audio);
+      }
+      
+      createDocumentAttachment(view, filename) {
+        const container = view.querySelector('.attachment-docs');
+        if (!container) return;
+        
+        const link = document.createElement('a');
+        link.className = 'attachment-doc';
+        link.href = this.getFileURL(filename);
+        link.download = filename;
+        link.target = '_blank';
+        link.rel = 'noreferrer';
+        link.textContent = filename;
+        container.appendChild(link);
+      }
+      
+      createMissingAttachment(view, filename) {
+        // Add missing files to the most appropriate container or create a general one
+        const container = view.querySelector('.attachment-docs') || 
+                         view.querySelector('.message-attachments');
+        if (!container) return;
+        
+        const missing = document.createElement('div');
+        missing.className = 'attachment-missing';
+        missing.innerHTML = `<span>${filename}</span><span class="missing-badge">missing file</span>`;
+        container.appendChild(missing);
+      }
+      
+      setupLazyLoading(img) {
+        if ('IntersectionObserver' in window) {
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                img.src = img.dataset.src;
+                observer.unobserve(img);
+              }
+            });
+          }, { threshold: 0.1 });
+          observer.observe(img);
+        } else {
+          img.src = img.dataset.src;
+        }
+      }
+      
+      getRecycledView(viewType) {
+        if (!this.recycledViews.has(viewType)) {
+          return null;
+        }
+        const views = this.recycledViews.get(viewType);
+        return views.length > 0 ? views.pop() : null;
+      }
+      
+      recycleView(view) {
+        const viewType = parseInt(view.dataset.viewType);
+        if (!this.recycledViews.has(viewType)) {
+          this.recycledViews.set(viewType, []);
+        }
+        
+        // Clean up the view before recycling
+        view.remove();
+        this.recycledViews.get(viewType).push(view);
+      }
+      
+      // Helper methods (will be integrated with existing functions)
+      getBaseName(filename) {
+        return filename.split('/').pop();
+      }
+      
+      getFileURL(filename) {
+        // This will integrate with existing lazyURLFor function
+        return lazyURLFor ? lazyURLFor(filename) : null;
+      }
+      
+      formatTime(date, iso) {
+        // This will integrate with existing formatTime function
+        return formatTime ? formatTime(date, iso) : (date ? date.toLocaleTimeString() : '');
+      }
+      
+      isRTL(text) {
+        // This will integrate with existing isRTL function
+        return isRTL ? isRTL(text) : false;
+      }
+      
+      openLightbox(kind, url, label) {
+        // This will integrate with existing openLightbox function
+        if (openLightbox) {
+          openLightbox(kind, url, label);
+        }
+      }
+      
+      openLightboxWithState(kind, url, label, currentTime, wasPaused) {
+        // This will integrate with existing openLightboxWithState function
+        if (window.openLightboxWithState) {
+          window.openLightboxWithState(kind, url, label, currentTime, wasPaused);
+        } else if (openLightbox) {
+          // Fallback to regular lightbox
+          openLightbox(kind, url, label);
+        }
+      }
+    }
+
+    // ListView Layer - Handles rendering and virtual scrolling
+    class ListView {
+      constructor(container, adapter) {
+        this.container = container;
+        this.adapter = adapter;
+        this.visibleRange = { start: 0, end: 0 };
+        this.activeViews = new Map(); // position -> view element
+        this.itemHeights = new Map(); // position -> measured height
+        this.estimatedItemHeight = 50; // Default estimated height for WhatsApp-style messages
+        this.scrollTop = 0;
+        this.containerHeight = 0;
+        this.totalHeight = 0;
+        this.buffer = 5; // Extra items to render outside viewport
+        
+        this.init();
+      }
+      
+      init() {
+        // Set up container
+        this.container.style.position = 'relative';
+        this.container.style.overflowY = 'auto';
+        
+        // Create flexbox-friendly viewport structure
+        this.viewport = document.createElement('div');
+        this.viewport.style.display = 'flex';
+        this.viewport.style.flexDirection = 'column';
+        this.viewport.style.width = '100%';
+        this.viewport.style.boxSizing = 'border-box';
+        this.viewport.style.minHeight = '100%';
+        
+        // Create spacer for maintaining scroll position (not used in new approach)
+        this.spacer = document.createElement('div');
+        this.spacer.style.width = '100%';
+        this.spacer.style.pointerEvents = 'none';
+        this.spacer.style.height = '0px';
+        
+        this.container.appendChild(this.viewport);
+        
+        // Register data observer
+        this.adapter.dataSource.registerObserver({
+          onDataSetChanged: () => this.notifyDataSetChanged()
+        });
+        
+        // Set up scroll listener
+        this.container.addEventListener('scroll', () => this.onScroll());
+        
+        // Set up resize observer
+        if ('ResizeObserver' in window) {
+          this.resizeObserver = new ResizeObserver(() => {
+            this.containerHeight = this.container.clientHeight;
+            this.updateVisibleRange();
+            this.render();
+          });
+          this.resizeObserver.observe(this.container);
+        }
+        
+        // Initial setup
+        this.containerHeight = this.container.clientHeight;
+        this.updateTotalHeight();
+        this.updateVisibleRange();
+        this.render();
+      }
+      
+      onScroll() {
+        this.scrollTop = this.container.scrollTop;
+        this.updateVisibleRange();
+        this.render();
+      }
+      
+      updateTotalHeight() {
+        const count = this.adapter.getCount();
+        let totalHeight = 0;
+        
+        for (let i = 0; i < count; i++) {
+          const measuredHeight = this.itemHeights.get(i);
+          totalHeight += measuredHeight || this.estimatedItemHeight;
+        }
+        
+        this.totalHeight = totalHeight;
+        this.spacer.style.height = `${this.totalHeight}px`;
+      }
+      
+      getItemTop(position) {
+        let top = 0;
+        for (let i = 0; i < position; i++) {
+          const height = this.itemHeights.get(i) || this.estimatedItemHeight;
+          top += height;
+        }
+        return top;
+      }
+      
+      updateVisibleRange() {
+        const count = this.adapter.getCount();
+        if (count === 0) {
+          this.visibleRange = { start: 0, end: -1 };
+          return;
+        }
+        
+        // Binary search to find start position
+        let start = 0;
+        let end = count - 1;
+        
+        while (start < end) {
+          const mid = Math.floor((start + end) / 2);
+          const itemTop = this.getItemTop(mid);
+          
+          if (itemTop < this.scrollTop) {
+            start = mid + 1;
+          } else {
+            end = mid;
+          }
+        }
+        
+        // Find end position
+        let endPos = start;
+        let currentTop = this.getItemTop(start);
+        const viewportBottom = this.scrollTop + this.containerHeight;
+        
+        while (endPos < count && currentTop < viewportBottom) {
+          const height = this.itemHeights.get(endPos) || this.estimatedItemHeight;
+          currentTop += height;
+          endPos++;
+        }
+        
+        // Apply buffer
+        this.visibleRange.start = Math.max(0, start - this.buffer);
+        this.visibleRange.end = Math.min(count - 1, endPos - 1 + this.buffer);
+      }
+      
+      render() {
+        const { start, end } = this.visibleRange;
+        
+        // Remove views that are no longer visible
+        const viewsToRemove = [];
+        for (const [position, view] of this.activeViews.entries()) {
+          if (position < start || position > end) {
+            viewsToRemove.push(position);
+            this.adapter.recycleView(view);
+            view.remove();
+          }
+        }
+        viewsToRemove.forEach(pos => this.activeViews.delete(pos));
+        
+        // Clear viewport and rebuild visible items in order
+        this.viewport.innerHTML = '';
+        
+        // Add visible views in order to maintain proper flexbox flow
+        for (let position = start; position <= end; position++) {
+          let view = this.activeViews.get(position);
+          
+          if (!view) {
+            view = this.adapter.getView(position, null, this.viewport);
+            this.activeViews.set(position, view);
+          }
+          
+          // Use flexbox-friendly positioning
+          view.style.position = 'static';
+          view.style.width = '100%';
+          view.style.marginBottom = '8px';
+          
+          this.viewport.appendChild(view);
+          
+          // Measure height after rendering
+          this.measureItemHeight(position, view);
+        }
+        
+        // Update spacer height for proper scrollbar
+        this.updateScrollPadding();
+      }
+      
+      measureItemHeight(position, view) {
+        // Use requestAnimationFrame to ensure DOM is updated
+        requestAnimationFrame(() => {
+          const height = view.offsetHeight;
+          const previousHeight = this.itemHeights.get(position);
+          
+          if (height > 0 && height !== previousHeight) {
+            this.itemHeights.set(position, height);
+            
+            // Update estimated height based on measured heights
+            this.updateEstimatedHeight();
+            
+            // Recalculate total height and re-render if height changed significantly
+            if (!previousHeight || Math.abs(height - previousHeight) > 5) {
+              this.updateTotalHeight();
+              this.updateVisibleRange();
+              this.render();
+            }
+          }
+        });
+      }
+      
+      updateEstimatedHeight() {
+        if (this.itemHeights.size === 0) return;
+        
+        const heights = Array.from(this.itemHeights.values());
+        const average = heights.reduce((sum, h) => sum + h, 0) / heights.length;
+        this.estimatedItemHeight = Math.max(35, Math.round(average)); // Minimum 35px for WhatsApp messages
+      }
+      
+      updateScrollPadding() {
+        const { start, end } = this.visibleRange;
+        const count = this.adapter.getCount();
+        
+        // Calculate padding before visible range
+        let paddingTop = 0;
+        for (let i = 0; i < start; i++) {
+          paddingTop += this.itemHeights.get(i) || this.estimatedItemHeight;
+        }
+        
+        // Calculate padding after visible range
+        let paddingBottom = 0;
+        for (let i = end + 1; i < count; i++) {
+          paddingBottom += this.itemHeights.get(i) || this.estimatedItemHeight;
+        }
+        
+        // Apply padding to maintain virtual scrolling effect
+        this.viewport.style.paddingTop = `${paddingTop}px`;
+        this.viewport.style.paddingBottom = `${paddingBottom}px`;
+      }
+      
+      scrollToPosition(position, alignment = 'start') {
+        if (position < 0 || position >= this.adapter.getCount()) {
+          return;
+        }
+        
+        const itemTop = this.getItemTop(position);
+        let scrollTop;
+        
+        switch (alignment) {
+          case 'center':
+            const itemHeight = this.itemHeights.get(position) || this.estimatedItemHeight;
+            scrollTop = itemTop - (this.containerHeight - itemHeight) / 2;
+            break;
+          case 'end':
+            scrollTop = itemTop - this.containerHeight + (this.itemHeights.get(position) || this.estimatedItemHeight);
+            break;
+          default: // 'start'
+            scrollTop = itemTop;
+        }
+        
+        scrollTop = Math.max(0, Math.min(scrollTop, this.totalHeight - this.containerHeight));
+        this.container.scrollTop = scrollTop;
+      }
+      
+      scrollToPositionSmooth(position, alignment = 'start') {
+        if (position < 0 || position >= this.adapter.getCount()) {
+          return;
+        }
+        
+        const itemTop = this.getItemTop(position);
+        let targetScrollTop;
+        
+        switch (alignment) {
+          case 'center':
+            const itemHeight = this.itemHeights.get(position) || this.estimatedItemHeight;
+            targetScrollTop = itemTop - (this.containerHeight - itemHeight) / 2;
+            break;
+          case 'end':
+            targetScrollTop = itemTop - this.containerHeight + (this.itemHeights.get(position) || this.estimatedItemHeight);
+            break;
+          default: // 'start'
+            targetScrollTop = itemTop;
+        }
+        
+        targetScrollTop = Math.max(0, Math.min(targetScrollTop, this.totalHeight - this.containerHeight));
+        
+        // Smooth scroll animation
+        const startScrollTop = this.container.scrollTop;
+        const distance = targetScrollTop - startScrollTop;
+        const duration = 500; // ms
+        const startTime = performance.now();
+        
+        const animateScroll = (currentTime) => {
+          const elapsed = currentTime - startTime;
+          const progress = Math.min(elapsed / duration, 1);
+          
+          // Easing function (ease-out)
+          const easeOut = 1 - Math.pow(1 - progress, 3);
+          
+          this.container.scrollTop = startScrollTop + distance * easeOut;
+          
+          if (progress < 1) {
+            requestAnimationFrame(animateScroll);
+          }
+        };
+        
+        requestAnimationFrame(animateScroll);
+      }
+      
+      highlightItem(position, duration = 2000) {
+        const view = this.activeViews.get(position);
+        if (view) {
+          view.classList.add('highlighted');
+          setTimeout(() => {
+            view.classList.remove('highlighted');
+          }, duration);
+        }
+      }
+      
+      notifyDataSetChanged() {
+        // Clear cached heights as data may have changed
+        this.itemHeights.clear();
+        
+        // Clear active views
+        for (const view of this.activeViews.values()) {
+          this.adapter.recycleView(view);
+        }
+        this.activeViews.clear();
+        
+        // Recalculate everything
+        this.updateTotalHeight();
+        this.updateVisibleRange();
+        this.render();
+      }
+      
+      getVisibleRange() {
+        return { ...this.visibleRange };
+      }
+      
+      getItemCount() {
+        return this.adapter.getCount();
+      }
+      
+      destroy() {
+        if (this.resizeObserver) {
+          this.resizeObserver.disconnect();
+        }
+        
+        this.adapter.dataSource.unregisterObserver(this);
+        
+        for (const view of this.activeViews.values()) {
+          this.adapter.recycleView(view);
+        }
+        this.activeViews.clear();
+      }
+    }
+
+    /*** Integration Layer - Connects ListView with existing code ***/
+    
+    // Global instances
+    let dataSource;
+    let adapter;
+    let listView;
+    
+    function initializeListView() {
+      dataSource = new ChatDataSource();
+      adapter = new ChatAdapter(dataSource);
+      listView = new ListView(chatEl, adapter);
+      
+      // Set up data observer for UI updates
+      dataSource.registerObserver({
+        onDataSetChanged: () => {
+          updateStats();
+          setProgress('');
+        }
+      });
+    }
+    
+    function setMessagesInListView(messagesArray) {
+      // Convert messages to have stable IDs and searchable text
+      const processedMessages = messagesArray.map((msg, index) => ({
+        ...msg,
+        originalIndex: index,
+        searchable: ((msg.sender||'') + ' ' + (msg.text||'') + 
+                    (msg.attachments && msg.attachments.length ? (' ' + msg.attachments.join(' ')) : '')).toLowerCase()
+      }));
+      
+      dataSource.setMessages(processedMessages);
+    }
+    
+    function applyFilterToListView() {
+      const q = (filterInput.value || '').toLowerCase().trim();
+      const typeQ = typeFilter.value;
+      const extQ = (extFilter.value || '').toLowerCase().trim();
+      
+      const filterPredicate = (m) => {
+        // Text search filter
+        if (q && !m.searchable.includes(q)) return false;
+        
+        // Message type filter  
+        if (typeQ && m.messageType !== typeQ) return false;
+        
+        // File extension filter
+        if (extQ && (!m.fileExtensions || !m.fileExtensions.some(ext => ext.includes(extQ)))) return false;
+        
+        return true;
+      };
+      
+      dataSource.applyFilter(filterPredicate);
+      
+      // Save filters to sessionStorage
+      try { 
+        sessionStorage.setItem('whz_filter', filterInput.value);
+        sessionStorage.setItem('whz_type_filter', typeFilter.value);
+        sessionStorage.setItem('whz_ext_filter', extFilter.value);
+      } catch {}
+    }
+    
+    function jumpToDateInListView(targetDate) {
+      if (!dataSource || !listView) return false;
+      
+      // Try exact date first
+      let position = dataSource.findPositionByDate(targetDate);
+      
+      // If no exact match, find nearest date
+      if (position === -1) {
+        position = dataSource.findPositionNearDate(targetDate);
+      }
+      
+      if (position !== -1) {
+        listView.scrollToPositionSmooth(position, 'center');
+        listView.highlightItem(position, 3000);
+        
+        // Update current date display
+        const item = dataSource.getItem(position);
+        if (item && item.date) {
+          currentViewDate = new Date(item.date);
+          updateCurrentDateDisplay();
+        }
+        return true;
+      }
+      
+      return false;
+    }
+
+    /*** Legacy State (to be refactored) ***/
     let rawFiles = {};
     let fileIndexByBase = {};
     let activeURLs = new Set();
-    let messages = [];
-    let filtered = [];
+    let messages = []; // Will be replaced by dataSource
+    let filtered = []; // Will be replaced by dataSource
     let participantsOrder = [];
     let unparsedLines = [];
     let looseMode = false;
+    let currentViewDate = null;
 
     const CHUNK_SIZE = 250;
 
@@ -167,7 +1399,17 @@
     const statsEl = document.getElementById('stats');
     const chatEl = document.getElementById('chat');
     const filterInput = document.getElementById('filterInput');
+    const typeFilter = document.getElementById('typeFilter');
+    const extFilter = document.getElementById('extFilter');
     const jumpDateInput = document.getElementById('jumpDate');
+    const dateInputPanel = document.getElementById('dateInputPanel');
+    const jumpGoBtn = document.getElementById('jumpGoBtn');
+    const jumpCancelBtn = document.getElementById('jumpCancelBtn');
+    const currentDateEl = document.getElementById('currentDate');
+    const backWeekBtn = document.getElementById('backWeek');
+    const back3DaysBtn = document.getElementById('back3Days');
+    const next3DaysBtn = document.getElementById('next3Days');
+    const nextWeekBtn = document.getElementById('nextWeek');
     const lightbox = document.getElementById('lightbox');
     const lightboxContent = document.getElementById('lightboxContent');
     const toggleLooseBtn = document.getElementById('toggleLoose');
@@ -183,11 +1425,13 @@
       filtered = [];
       participantsOrder = [];
       unparsedLines = [];
+      currentViewDate = null;
       chatEl.innerHTML = '';
       statsEl.textContent = '';
       progressEl.textContent = '';
       unparsedBox.style.display = 'none';
       unparsedBox.textContent = '';
+      updateCurrentDateDisplay();
     }
 
     function setProgress(msg) { progressEl.textContent = msg; }
@@ -312,6 +1556,41 @@
       return { kind: 'doc', mime: 'application/octet-stream' };
     }
 
+    function getMessageType(message) {
+      // If no attachments, classify by text content
+      if (!message.attachments || message.attachments.length === 0) {
+        return message.text ? 'text' : 'system';
+      }
+      
+      // If has attachments, classify by attachment types regardless of text
+      const types = new Set();
+      
+      for (const attachment of message.attachments) {
+        const base = getBaseName(attachment);
+        const { kind } = classifyMedia(base);
+        types.add(kind);
+        
+        // Debug logging for video files
+        if (base.toLowerCase().includes('vid') || /\.(mp4|mov|webm|m4v)$/i.test(base)) {
+          console.log('Video attachment detected:', { attachment, base, kind, messageText: message.text?.substring(0, 50) });
+        }
+      }
+      
+      if (types.size === 1) {
+        const result = Array.from(types)[0];
+        // Debug logging for video types
+        if (result === 'video') {
+          console.log('Message classified as video:', { attachments: message.attachments, types: Array.from(types), text: message.text?.substring(0, 50) });
+        }
+        return result; // 'image', 'video', 'audio', or 'doc'
+      } else if (types.size > 1) {
+        return 'mixed';
+      }
+      
+      // Fallback - shouldn't reach here if attachments exist
+      return message.text ? 'text' : 'system';
+    }
+
     function getBaseName(path) {
       const i = path.lastIndexOf('/');
       const j = path.lastIndexOf('\\');
@@ -364,8 +1643,25 @@
           if (parsed.sender && !participantsOrder.includes(parsed.sender)) {
             participantsOrder.push(parsed.sender);
           }
+          
+          // Add message type and file extensions
+          const messageType = getMessageType(parsed);
+          const fileExtensions = [];
+          if (parsed.attachments) {
+            for (const attachment of parsed.attachments) {
+              const base = getBaseName(attachment);
+              const extMatch = base.match(/\.([^.]+)$/);
+              if (extMatch) {
+                const ext = extMatch[1].toLowerCase();
+                if (!fileExtensions.includes(ext)) {
+                  fileExtensions.push(ext);
+                }
+              }
+            }
+          }
+          
           const searchable = ((parsed.sender||'') + ' ' + (parsed.text||'') + (parsed.attachments.length? (' ' + parsed.attachments.join(' ')) : '')).toLowerCase();
-          messages.push({ ...parsed, searchable });
+          messages.push({ ...parsed, searchable, messageType, fileExtensions });
           current = messages[messages.length - 1];
         } else {
           // continuation of previous message
@@ -484,6 +1780,10 @@
     }
 
     function openLightbox(kind, url, label) {
+      openLightboxWithState(kind, url, label, 0, true);
+    }
+    
+    function openLightboxWithState(kind, url, label, currentTime = 0, wasPaused = true) {
       lightboxContent.innerHTML = '';
       let node;
       if (kind === 'img') {
@@ -494,18 +1794,75 @@
         node = document.createElement('video');
         node.src = url;
         node.controls = true;
-        node.autoplay = true;
+        node.dataset.filename = label; // Store filename for reverse sync
+        node.dataset.wasPaused = wasPaused;
+        
+        // Set up video with state
+        node.addEventListener('loadedmetadata', () => {
+          node.currentTime = currentTime;
+          if (!wasPaused && currentTime > 0) {
+            node.play().catch(() => {
+              // Auto-play might be blocked, that's ok
+            });
+          }
+        });
+        
+        // If metadata is already loaded
+        if (node.readyState >= 1) {
+          node.currentTime = currentTime;
+          if (!wasPaused && currentTime > 0) {
+            node.play().catch(() => {});
+          }
+        }
       }
+      
+      // Store reference for sync back
+      window.currentLightboxVideo = kind === 'video' ? node : null;
+      
       lightboxContent.appendChild(node);
       lightbox.classList.add('show');
       lightbox.focus();
     }
+    
+    // Make it globally available
+    window.openLightboxWithState = openLightboxWithState;
 
     function closeLightbox() {
-      const media = lightboxContent.querySelector('video');
-      if (media) try { media.pause(); } catch {}
+      const lightboxVideo = lightboxContent.querySelector('video');
+      
+      // Sync video state back to thumbnail before closing
+      if (lightboxVideo && lightboxVideo.dataset.filename) {
+        const filename = lightboxVideo.dataset.filename;
+        const currentTime = lightboxVideo.currentTime || 0;
+        const isPaused = lightboxVideo.paused;
+        
+        // Find the corresponding thumbnail video
+        const thumbnailVideo = document.querySelector(`video[data-filename="${filename}"]`);
+        if (thumbnailVideo) {
+          // Sync state back to thumbnail
+          if (thumbnailVideo.readyState >= 1) {
+            thumbnailVideo.currentTime = currentTime;
+            if (!isPaused && currentTime > 0) {
+              thumbnailVideo.play().catch(() => {});
+            }
+          } else {
+            // Wait for metadata to load
+            thumbnailVideo.addEventListener('loadedmetadata', () => {
+              thumbnailVideo.currentTime = currentTime;
+              if (!isPaused && currentTime > 0) {
+                thumbnailVideo.play().catch(() => {});
+              }
+            }, { once: true });
+          }
+        }
+        
+        // Pause lightbox video
+        try { lightboxVideo.pause(); } catch {}
+      }
+      
       lightbox.classList.remove('show');
       lightboxContent.innerHTML = '';
+      window.currentLightboxVideo = null;
     }
 
     lightbox.addEventListener('click', (e) => { if (e.target === lightbox || e.target === lightboxContent) closeLightbox(); });
@@ -558,6 +1915,7 @@
             frag.appendChild(sep);
             lastDayKey = dayKey;
           }
+          // Use the actual index i (position in filtered list) for the ID
           frag.appendChild(makeBubble(msg, i));
         }
         chatEl.appendChild(frag);
@@ -572,25 +1930,204 @@
     }
 
     function applyFilter() {
-      const q = (filterInput.value || '').toLowerCase().trim();
-      filtered = !q ? messages : messages.filter(m => m.searchable.includes(q));
-      try { localStorage.setItem('whz_filter', filterInput.value); } catch {}
-      renderMessages(filtered);
+      if (listView && dataSource) {
+        // Use new ListView
+        applyFilterToListView();
+      } else {
+        // Legacy fallback
+        const q = (filterInput.value || '').toLowerCase().trim();
+        const typeQ = typeFilter.value;
+        const extQ = (extFilter.value || '').toLowerCase().trim();
+        
+        filtered = messages.filter(m => {
+          // Text search filter
+          if (q && !m.searchable.includes(q)) return false;
+          
+          // Message type filter
+          if (typeQ && m.messageType !== typeQ) return false;
+          
+          // File extension filter
+          if (extQ && (!m.fileExtensions || !m.fileExtensions.some(ext => ext.includes(extQ)))) return false;
+          
+          return true;
+        });
+        
+        // Save filters to sessionStorage
+        try { 
+          sessionStorage.setItem('whz_filter', filterInput.value);
+          sessionStorage.setItem('whz_type_filter', typeFilter.value);
+          sessionStorage.setItem('whz_ext_filter', extFilter.value);
+        } catch {}
+        
+        renderMessages(filtered);
+      }
     }
 
-    function jumpToDate() {
-      const val = jumpDateInput.value;
+    function updateCurrentDateDisplay() {
+      if (currentViewDate) {
+        const options = { year: 'numeric', month: 'short', day: 'numeric' };
+        currentDateEl.textContent = currentViewDate.toLocaleDateString('en-US', options);
+      } else {
+        currentDateEl.textContent = '-';
+      }
+    }
+
+    function jumpToDate(targetDate = null, direction = 'forward') {
+      const val = targetDate || jumpDateInput.value;
       if (!val) return;
-      const target = new Date(val + 'T00:00:00');
+      
+      const target = typeof val === 'string' ? new Date(val + 'T00:00:00') : val;
       if (isNaN(target.getTime())) return;
-      let idx = filtered.findIndex(m => m.date && m.date >= target);
-      if (idx < 0) idx = filtered.length - 1;
-      const el = document.getElementById('m-' + idx);
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      
+      if (listView && dataSource) {
+        // Use new ListView
+        const success = jumpToDateInListView(target);
+        if (success) {
+          currentViewDate = new Date(target);
+          updateCurrentDateDisplay();
+        }
+        return;
+      }
+      
+      let idx = -1;
+      
+      if (direction === 'forward') {
+        // Find first message on or after target date
+        idx = filtered.findIndex(m => m.date && m.date >= target);
+        if (idx < 0) idx = filtered.length - 1;
+      } else {
+        // Find last message on or before target date
+        for (let i = filtered.length - 1; i >= 0; i--) {
+          if (filtered[i].date && filtered[i].date <= target) {
+            idx = i;
+            break;
+          }
+        }
+        if (idx < 0) idx = 0; // If no messages before target, go to first message
+      }
+      
+      // Get the message element using the filtered array index directly
+      const messageId = 'm-' + idx;
+      const messageEl = document.getElementById(messageId);
+      if (!messageEl) {
+        return;
+      }
+      
+      // Add visual highlight to the target element temporarily
+      messageEl.style.backgroundColor = 'rgba(58, 160, 255, 0.2)';
+      messageEl.style.transition = 'background-color 0.5s ease';
+      setTimeout(() => {
+        messageEl.style.backgroundColor = '';
+        setTimeout(() => messageEl.style.transition = '', 500);
+      }, 2000);
+      
+      // Use scrollIntoView which works with the container hierarchy
+      messageEl.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+      
+      // Small adjustment to account for padding
+      setTimeout(() => {
+        const mainEl = document.querySelector('main');
+        if (mainEl) mainEl.scrollTop -= 20;
+      }, 100);
+      
+      // Always update currentViewDate to the actual message date we jumped to
+      if (filtered[idx] && filtered[idx].date) {
+        currentViewDate = new Date(filtered[idx].date);
+      }
+      updateCurrentDateDisplay();
+    }
+
+    function navigateByDays(days) {
+      if (!currentViewDate && filtered.length > 0) {
+        // If no current date, start from the first message date
+        const firstMsg = filtered.find(m => m.date);
+        if (firstMsg) currentViewDate = new Date(firstMsg.date);
+      }
+      
+      if (!currentViewDate) return;
+      
+      const newDate = new Date(currentViewDate);
+      newDate.setDate(newDate.getDate() + days);
+      
+      // Use backward direction for negative days, forward for positive
+      const direction = days < 0 ? 'backward' : 'forward';
+      jumpToDate(newDate, direction);
     }
 
     filterInput.addEventListener('input', applyFilter);
-    jumpDateInput.addEventListener('change', jumpToDate);
+    typeFilter.addEventListener('change', applyFilter);
+    extFilter.addEventListener('input', applyFilter);
+    
+    // Date navigation event listeners
+    let dateInputVisible = false;
+    
+    function showDateInput() {
+      if (dateInputVisible) return;
+      dateInputVisible = true;
+      dateInputPanel.style.display = 'block';
+      currentDateEl.style.opacity = '0.5';
+      // Set current date as default if available
+      if (currentViewDate) {
+        const dateStr = currentViewDate.toISOString().split('T')[0];
+        jumpDateInput.value = dateStr;
+      }
+      jumpDateInput.focus();
+    }
+    
+    function hideDateInput() {
+      if (!dateInputVisible) return;
+      dateInputVisible = false;
+      dateInputPanel.style.display = 'none';
+      currentDateEl.style.opacity = '1';
+      jumpDateInput.value = '';
+    }
+    
+    function jumpToManualDate() {
+      const dateStr = jumpDateInput.value;
+      if (!dateStr) return;
+      
+      const target = new Date(dateStr + 'T00:00:00');
+      if (isNaN(target.getTime())) {
+        alert('Invalid date selected');
+        return;
+      }
+      
+      jumpToDate(target, 'forward');
+      hideDateInput();
+    }
+    
+    // Current date display - click to show date input panel
+    currentDateEl.addEventListener('click', showDateInput);
+    
+    // Go button
+    jumpGoBtn.addEventListener('click', jumpToManualDate);
+    
+    // Cancel button
+    jumpCancelBtn.addEventListener('click', hideDateInput);
+    
+    // Date input - Enter to jump, Escape to cancel
+    jumpDateInput.addEventListener('keypress', (e) => { 
+      if (e.key === 'Enter') jumpToManualDate(); 
+    });
+    jumpDateInput.addEventListener('keydown', (e) => { 
+      if (e.key === 'Escape') hideDateInput(); 
+    });
+    
+    // Click outside to close panel
+    document.addEventListener('click', (e) => {
+      if (dateInputVisible && !dateInputPanel.contains(e.target) && e.target !== currentDateEl) {
+        hideDateInput();
+      }
+    });
+    
+    // Date navigation buttons
+    backWeekBtn.addEventListener('click', () => navigateByDays(-7));
+    back3DaysBtn.addEventListener('click', () => navigateByDays(-3));
+    next3DaysBtn.addEventListener('click', () => navigateByDays(3));
+    nextWeekBtn.addEventListener('click', () => navigateByDays(7));
 
     toggleLooseBtn.addEventListener('click', () => {
       looseMode = !looseMode;
@@ -625,24 +2162,22 @@
       }
       setProgress('Parsing transcript…');
       parseChatText(text);
+      
+      // Initialize ListView if not already done
+      if (!listView) {
+        initializeListView();
+      }
+      
+      // Set messages in ListView
+      setMessagesInListView(messages);
+      
       updateStats();
-      filtered = messages;
-      if (filterInput.value) filtered = messages.filter(m => m.searchable.includes(filterInput.value.toLowerCase()));
-      renderMessages(filtered);
+      applyFilter(); // Use applyFilter to handle all current filter settings
     }
 
-    // Persist/restore UI state
-    (function restoreUI() {
-      try {
-        const prevName = localStorage.getItem('whz_zip_name');
-        if (prevName) fileNameEl.textContent = prevName;
-        const prevFilter = localStorage.getItem('whz_filter');
-        if (prevFilter) filterInput.value = prevFilter;
-      } catch {}
-    })();
 
     /*** File intake ***/
-    chooseBtn.addEventListener('click', () => fileInput.click());
+    // chooseBtn click handler removed - native label behavior handles file picker opening
     fileInput.addEventListener('change', (e) => {
       const f = e.target.files && e.target.files[0];
       if (f) handleZipFile(f);
@@ -652,14 +2187,17 @@
     ;['dragleave','drop'].forEach(t => dropzone.addEventListener(t, (e) => { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('drag'); }));
     dropzone.addEventListener('drop', (e) => {
       const f = e.dataTransfer?.files?.[0];
-      if (f) { fileInput.files = e.dataTransfer.files; handleZipFile(f); }
+      if (f) { 
+        fileInput.files = e.dataTransfer.files; 
+        // Don't call handleZipFile directly - let the change event handle it
+      }
     });
 
     async function handleZipFile(file) {
       resetState();
       const name = file.name || 'unknown.zip';
       fileNameEl.textContent = name;
-      try { localStorage.setItem('whz_zip_name', name); } catch {}
+      try { sessionStorage.setItem('whz_zip_name', name); } catch {}
 
       if (!/\.zip$/i.test(name)) {
         setProgress('Please choose a .zip file.');
