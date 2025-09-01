@@ -27,23 +27,42 @@
     background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0)) , var(--panel);
     border-bottom: 1px solid #1d2935;
     transition: all 0.3s ease;
+    max-height: 25vh;
+    display: flex;
+    flex-direction: column;
   }
   
   .control-panel {
-    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  
+  .control-panel-header {
+    flex-shrink: 0;
+    padding: 6px 14px 0 14px;
+  }
+  
+  .control-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 14px 6px 14px;
     transition: all 0.3s ease;
   }
   
-  .control-panel.minimized {
-    padding: 8px 20px;
+  .control-panel-content.minimized {
+    max-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
   }
   
   .panel-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
     border-bottom: 1px solid rgba(45, 57, 72, 0.5);
   }
   
@@ -61,7 +80,7 @@
   
   .title { 
     font-weight: 600; 
-    font-size: 18px;
+    font-size: 16px;
     opacity: 0.9; 
     margin: 0;
   }
@@ -70,15 +89,15 @@
     background: rgba(22, 32, 42, 0.8);
     border: 1px solid #2a3a4b;
     color: var(--ink);
-    padding: 8px 12px;
-    border-radius: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
   }
   
   .minimize-btn:hover {
@@ -86,18 +105,9 @@
     background: rgba(26, 37, 47, 0.9);
   }
   
-  .panel-content {
-    overflow: hidden;
-    transition: all 0.3s ease;
-  }
-  
-  .panel-content.minimized {
-    max-height: 0;
-    opacity: 0;
-  }
   
   .section {
-    margin-bottom: 20px;
+    margin-bottom: 6px;
   }
   
   .section:last-child {
@@ -105,10 +115,10 @@
   }
   
   .section-title {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--muted);
-    margin-bottom: 10px;
+    margin-bottom: 4px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
@@ -121,7 +131,7 @@
   }
   .file-btn {
     appearance: none; border: 1px solid #2a3a4b; background: #16202a; color: var(--ink);
-    padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 600;
+    padding: 6px 10px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;
   }
   .file-btn:hover { border-color:#3b5168; }
   input[type="file"] { display:none; }
@@ -141,8 +151,8 @@
   }
   
   .filter-input, .type-filter, .ext-filter {
-    padding: 12px 14px; 
-    border-radius: 10px; 
+    padding: 6px 8px; 
+    border-radius: 6px; 
     border: 1px solid #2a3a4b; 
     background: #0d141b; 
     color: var(--ink);
@@ -157,10 +167,10 @@
   }
   
   .file-section {
-    display: grid;
-    grid-template-columns: auto auto 1fr;
-    gap: 16px;
+    display: flex;
+    gap: 8px;
     align-items: center;
+    flex-wrap: wrap;
   }
   
   .filename-display {
@@ -169,29 +179,36 @@
     opacity: 0.8;
   }
   
-  .date-nav { 
-    display: grid;
-    grid-template-columns: auto auto 1fr auto auto;
-    gap: 12px;
+  .nav-tools-row {
+    display: flex;
+    gap: 10px;
     align-items: center;
-    padding: 16px 20px; 
-    background: rgba(13, 20, 27, 0.6); 
-    border: 1px solid #2a3a4b; 
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
+    justify-content: space-between;
+  }
+  
+  .date-nav { 
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 6px 8px; 
+    background: rgba(13, 20, 27, 0.3); 
+    border: 1px solid rgba(42, 58, 75, 0.5); 
+    border-radius: 6px;
+    flex: 1;
+    justify-content: center;
   }
   
   .date-nav-btn {
     appearance: none; 
-    border: 1px solid #2a3a4b; 
-    background: rgba(22, 32, 42, 0.8); 
+    border: 1px solid rgba(42, 58, 75, 0.5); 
+    background: rgba(22, 32, 42, 0.4); 
     color: var(--ink);
-    padding: 10px 14px; 
-    border-radius: 8px; 
+    padding: 4px 8px; 
+    border-radius: 4px; 
     cursor: pointer; 
-    font-size: 14px; 
+    font-size: 11px; 
     font-weight: 600;
-    min-width: 44px;
+    min-width: 26px;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
@@ -200,37 +217,34 @@
   
   .date-nav-btn:hover { 
     border-color: #3b5168; 
-    background: rgba(26, 37, 47, 0.9); 
-    transform: translateY(-1px);
+    background: rgba(26, 37, 47, 0.6); 
   }
   
   .date-control { 
     position: relative; 
-    justify-self: center;
     display: flex;
     align-items: center;
-    min-width: 120px;
-    justify-content: center;
+    margin: 0 6px;
   }
   
   .current-date-btn { 
     color: var(--ink); 
-    font-size: 14px; 
+    font-size: 11px; 
     font-weight: 600; 
     cursor: pointer; 
-    padding: 10px 16px; 
-    border-radius: 8px;
-    background: rgba(22, 32, 42, 0.8);
-    border: 1px solid #2a3a4b;
+    padding: 4px 8px; 
+    border-radius: 4px;
+    background: rgba(22, 32, 42, 0.4);
+    border: 1px solid rgba(42, 58, 75, 0.5);
     transition: all 0.2s ease;
-    min-width: 140px;
+    min-width: 80px;
     text-align: center;
     display: inline-block;
   }
   
   .current-date-btn:hover { 
     border-color: #3b5168; 
-    background: rgba(26, 37, 47, 0.9); 
+    background: rgba(26, 37, 47, 0.6); 
   }
   
   .date-input-panel {
@@ -258,18 +272,39 @@
   .date-input-btn.cancel:hover { border-color: #ff6b6b; background: #2a1616; }
 
   .dropzone {
-    margin-top: 8px;
-    border: 1px dashed #2a3a4b; border-radius: 10px; padding: 10px;
-    display:flex; gap:8px; align-items:center; color: var(--muted);
+    margin-top: 4px;
+    border: 1px dashed #2a3a4b; border-radius: 6px; padding: 6px 8px;
+    display:flex; gap:6px; align-items:center; color: var(--muted);
+    font-size: 13px;
   }
   .dropzone.drag { border-color: var(--accent); color: var(--ink); background:#0b1220; }
 
   .stats {
-    display:flex; gap:10px; flex-wrap:wrap; margin-top: 8px; color: var(--muted); font-size: 13px;
+    display:flex; gap:8px; flex-wrap:wrap; margin-top: 4px; color: var(--muted); font-size: 12px;
+  }
+  
+  .stats:empty, .progress:empty {
+    display: none;
+  }
+  
+  .section:has(.stats:empty, .progress:empty, .unparsed-box:empty) .progress-bar-container {
+    display: none;
   }
   .stats b { color: var(--ink); }
 
-  .progress { margin-top: 6px; color: var(--muted); font-size: 13px; min-height: 1.2em; }
+  .progress { margin-top: 6px; color: var(--muted); font-size: 13px; }
+  
+  .progress:empty {
+    margin-top: 0;
+  }
+  
+  .section.stats-section {
+    display: none;
+  }
+  
+  .section.stats-section.has-content {
+    display: block;
+  }
   
   .progress-bar-container {
     width: 100%;
@@ -609,39 +644,44 @@
   /* Footer note */
   footer { padding: 8px 10px 12px; color: var(--muted); font-size: 12px; text-align: center; }
 
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
+  .tools-compact {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    padding: 6px 8px;
+    background: rgba(13, 20, 27, 0.3);
+    border: 1px solid rgba(42, 58, 75, 0.5);
+    border-radius: 6px;
   }
   
   .mini-btn { 
-    padding: 10px 16px; 
-    border-radius: 8px; 
-    border: 1px solid #2a3a4b; 
-    background: rgba(22, 32, 42, 0.8); 
-    color: var(--ink); 
+    padding: 4px 8px; 
+    border-radius: 4px; 
+    border: 1px solid rgba(42, 58, 75, 0.5); 
+    background: rgba(22, 32, 42, 0.4); 
+    color: var(--muted); 
     cursor: pointer; 
-    font-size: 13px;
+    font-size: 10px;
     font-weight: 500;
     transition: all 0.2s ease;
     text-align: center;
+    white-space: nowrap;
   }
   
   .mini-btn:hover { 
     border-color: #3b5168; 
-    background: rgba(26, 37, 47, 0.9);
-    transform: translateY(-1px);
+    background: rgba(26, 37, 47, 0.6);
+    color: var(--ink);
   }
   
   .dropzone {
     background: linear-gradient(135deg, rgba(13, 20, 27, 0.4), rgba(22, 32, 42, 0.4));
     border: 2px dashed #2a3a4b;
-    border-radius: 16px;
-    padding: 24px;
+    border-radius: 12px;
+    padding: 16px;
     text-align: center;
     color: var(--muted);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
@@ -658,18 +698,20 @@
 <body>
   <header>
     <div class="control-panel" id="controlPanel">
-      <div class="panel-header" id="panelHeader">
-        <div class="panel-title">
-          <h1 class="title">WhatsApp Chat Viewer</h1>
-          <span class="filename-display" id="fileName">No file chosen</span>
+      <div class="control-panel-header">
+        <div class="panel-header" id="panelHeader">
+          <div class="panel-title">
+            <h1 class="title">WhatsApp Chat Viewer</h1>
+            <span class="filename-display" id="fileName">No file chosen</span>
+          </div>
+          <button class="minimize-btn" id="minimizeBtn">
+            <span id="minimizeIcon">⌄</span>
+            <span id="minimizeText">Minimize</span>
+          </button>
         </div>
-        <button class="minimize-btn" id="minimizeBtn">
-          <span id="minimizeIcon">⌄</span>
-          <span id="minimizeText">Minimize</span>
-        </button>
       </div>
       
-      <div class="panel-content" id="panelContent">
+      <div class="control-panel-content" id="panelContent">
         <div class="section">
           <div class="section-title">File Import</div>
           <div class="file-section">
@@ -681,6 +723,15 @@
               Drop WhatsApp export .zip here (kept local, never uploaded)
             </div>
           </div>
+        </div>
+
+        <div class="section stats-section" id="statsSection">
+          <div id="stats" class="stats" aria-live="polite"></div>
+          <div id="progress" class="progress" aria-live="polite"></div>
+          <div id="progressBarContainer" class="progress-bar-container">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <div id="unparsedBox" class="unparsed-box"></div>
         </div>
 
         <div class="section">
@@ -701,40 +752,29 @@
         </div>
 
         <div class="section">
-          <div class="section-title">Navigation</div>
-          <div class="date-nav">
-            <button id="backWeek" class="date-nav-btn" title="Go back 1 week">◀◀</button>
-            <button id="back3Days" class="date-nav-btn" title="Go back 3 days">◀</button>
-            <div class="date-control">
-              <span id="currentDate" class="current-date-btn" title="Click to enter specific date">-</span>
-              <div id="dateInputPanel" class="date-input-panel" style="display: none;">
-                <input id="jumpDate" class="jump-date-input" type="date" title="Select date from calendar" />
-                <div class="date-input-buttons">
-                  <button id="jumpGoBtn" class="date-input-btn" title="Jump to date">Go</button>
-                  <button id="jumpCancelBtn" class="date-input-btn cancel" title="Cancel">✕</button>
+          <div class="section-title">Navigation & Options</div>
+          <div class="nav-tools-row">
+            <div class="date-nav">
+              <button id="backWeek" class="date-nav-btn" title="Go back 1 week">◀◀</button>
+              <button id="back3Days" class="date-nav-btn" title="Go back 3 days">◀</button>
+              <div class="date-control">
+                <span id="currentDate" class="current-date-btn" title="Click to enter specific date">-</span>
+                <div id="dateInputPanel" class="date-input-panel" style="display: none;">
+                  <input id="jumpDate" class="jump-date-input" type="date" title="Select date from calendar" />
+                  <div class="date-input-buttons">
+                    <button id="jumpGoBtn" class="date-input-btn" title="Jump to date">Go</button>
+                    <button id="jumpCancelBtn" class="date-input-btn cancel" title="Cancel">✕</button>
+                  </div>
                 </div>
               </div>
+              <button id="next3Days" class="date-nav-btn" title="Go forward 3 days">▶</button>
+              <button id="nextWeek" class="date-nav-btn" title="Go forward 1 week">▶▶</button>
             </div>
-            <button id="next3Days" class="date-nav-btn" title="Go forward 3 days">▶</button>
-            <button id="nextWeek" class="date-nav-btn" title="Go forward 1 week">▶▶</button>
+            <div class="tools-compact">
+              <button id="toggleLoose" class="mini-btn" title="Looser parsing mode for quirky exports">Loose: OFF</button>
+              <button id="showUnparsed" class="mini-btn">Unparsed</button>
+            </div>
           </div>
-        </div>
-
-        <div class="section">
-          <div class="section-title">Advanced Options</div>
-          <div class="tools-grid">
-            <button id="toggleLoose" class="mini-btn" title="Looser parsing mode for quirky exports">Loose Parsing: OFF</button>
-            <button id="showUnparsed" class="mini-btn">Show Unparsed Sample</button>
-          </div>
-        </div>
-
-        <div class="section">
-          <div id="stats" class="stats" aria-live="polite"></div>
-          <div id="progress" class="progress" aria-live="polite"></div>
-          <div id="progressBarContainer" class="progress-bar-container">
-            <div id="progressBar" class="progress-bar"></div>
-          </div>
-          <div id="unparsedBox" class="unparsed-box"></div>
         </div>
       </div>
     </div>
@@ -1697,6 +1737,7 @@
     const fileNameEl = document.getElementById('fileName');
     const progressEl = document.getElementById('progress');
     const statsEl = document.getElementById('stats');
+    const statsSection = document.getElementById('statsSection');
     const chatEl = document.getElementById('chat');
     const filterInput = document.getElementById('filterInput');
     const typeFilter = document.getElementById('typeFilter');
@@ -2245,11 +2286,19 @@
         unparsedLines.length ? `<span title="Lines that didn’t match known formats"><b>${unparsedLines.length}</b> unparsed lines</span>` : null
       ].filter(Boolean);
       statsEl.innerHTML = parts.join(' · ');
+      
+      // Show stats section when content is available
+      if (parts.length > 0) {
+        statsSection.classList.add('has-content');
+      }
     }
 
     function destroyChat() {
       revokeAllURLs();
       chatEl.innerHTML = '';
+      statsEl.innerHTML = '';
+      progressEl.innerHTML = '';
+      statsSection.classList.remove('has-content');
     }
 
     function renderMessages(list) {
@@ -2484,7 +2533,7 @@
 
     toggleLooseBtn.addEventListener('click', () => {
       looseMode = !looseMode;
-      toggleLooseBtn.textContent = 'Loose Parsing: ' + (looseMode ? 'ON' : 'OFF');
+      toggleLooseBtn.textContent = 'Loose: ' + (looseMode ? 'ON' : 'OFF');
       if (rawFiles && Object.keys(rawFiles).length) {
         // Re-run parsing if we already loaded a file
         rerunParsing();
@@ -2545,15 +2594,11 @@
       const mainEl = document.querySelector('main');
       
       if (isMinimized) {
-        controlPanel.classList.add('minimized');
-        panelHeader.classList.add('minimized');
         panelContent.classList.add('minimized');
         mainEl.classList.add('panel-minimized');
         minimizeIcon.textContent = '⌃';
         minimizeText.textContent = 'Expand';
       } else {
-        controlPanel.classList.remove('minimized');
-        panelHeader.classList.remove('minimized');
         panelContent.classList.remove('minimized');
         mainEl.classList.remove('panel-minimized');
         minimizeIcon.textContent = '⌄';
