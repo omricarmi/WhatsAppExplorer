@@ -253,8 +253,8 @@
   }
   
   .attachment-thumb { 
-    max-width: 150px;
-    max-height: 150px;
+    max-width: 220px;
+    max-height: 220px;
     min-width: 100px;
     min-height: 100px;
     border-radius: 8px; 
@@ -271,8 +271,8 @@
   
   /* Single image can be larger */
   .attachment-images:has(:only-child) .attachment-thumb {
-    max-width: 200px;
-    max-height: 200px;
+    max-width: 280px;
+    max-height: 280px;
   }
   
   /* Video Attachments */
@@ -281,11 +281,20 @@
   }
   
   .attachment-video { 
-    max-width: 200px;
-    max-height: 150px;
+    max-width: 320px;
+    max-height: 240px;
     width: 100%;
     border-radius: 8px;
     background: rgba(0,0,0,0.8);
+  }
+  
+  /* Hide fullscreen button from thumbnail videos */
+  .attachment-video::-webkit-media-controls-fullscreen-button {
+    display: none !important;
+  }
+  
+  .attachment-video::-moz-media-controls-fullscreen-button {
+    display: none !important;
   }
   
   /* Audio Attachments */
@@ -821,8 +830,8 @@
         video.src = this.getFileURL(filename);
         video.dataset.filename = filename; // Store filename for sync
         video.style.cssText = `
-          max-width: 280px;
-          max-height: 200px;
+          max-width: 320px;
+          max-height: 240px;
           width: auto;
           height: auto;
           border-radius: 8px;
@@ -1839,19 +1848,15 @@
         // Find the corresponding thumbnail video
         const thumbnailVideo = document.querySelector(`video[data-filename="${filename}"]`);
         if (thumbnailVideo) {
-          // Sync state back to thumbnail
+          // Sync state back to thumbnail and pause it
           if (thumbnailVideo.readyState >= 1) {
             thumbnailVideo.currentTime = currentTime;
-            if (!isPaused && currentTime > 0) {
-              thumbnailVideo.play().catch(() => {});
-            }
+            thumbnailVideo.pause(); // Always pause thumbnail when closing lightbox
           } else {
             // Wait for metadata to load
             thumbnailVideo.addEventListener('loadedmetadata', () => {
               thumbnailVideo.currentTime = currentTime;
-              if (!isPaused && currentTime > 0) {
-                thumbnailVideo.play().catch(() => {});
-              }
+              thumbnailVideo.pause(); // Always pause thumbnail when closing lightbox
             }, { once: true });
           }
         }
