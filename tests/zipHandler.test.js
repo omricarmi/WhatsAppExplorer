@@ -248,11 +248,13 @@ describe('ZipHandler', () => {
         it('should provide cache statistics', () => {
             handler.getMediaURL('file1.jpg');
             handler.getMediaURL('file2.jpg');
+            handler.getMediaURL('missing.jpg'); // This doesn't exist
             
             const stats = handler.getCacheStats();
             expect(stats.cacheSize).toBe(2);
             expect(stats.maxCacheSize).toBe(3);
             expect(stats.totalMedia).toBe(4);
+            expect(stats.missingFiles).toBe(1);
             expect(stats.cacheUtilization).toBeCloseTo(66.67, 1);
         });
 
@@ -268,6 +270,7 @@ describe('ZipHandler', () => {
         it('should clear all URLs on clear()', () => {
             handler.getMediaURL('file1.jpg');
             handler.getMediaURL('file2.jpg');
+            handler.getMediaURL('missing.jpg'); // Track a missing file
             
             handler.clear();
             
@@ -275,6 +278,7 @@ describe('ZipHandler', () => {
             expect(URL.revokeObjectURL).toHaveBeenCalledTimes(2);
             expect(handler.chatContent).toBeNull();
             expect(handler.mediaFiles.size).toBe(0);
+            expect(handler.missingFiles.size).toBe(0);
         });
     });
 
@@ -313,6 +317,78 @@ describe('ZipHandler', () => {
             const estimate = handler.getMemoryEstimate();
             // Chat content (17 chars * 2 bytes) + photo (3 bytes) + video (5 bytes)
             expect(estimate).toBe(34 + 3 + 5);
+        });
+    });
+
+    describe('Missing Files Tracking', () => {
+        beforeEach(async () => {
+            const mockZipContents = {
+                'chat.txt': new TextEncoder().encode('Chat'),
+                'photo1.jpg': new Uint8Array([1, 2, 3]),
+                'photo2.jpg': new Uint8Array([4, 5, 6])
+            };
+            window.fflate.unzipSync.and.returnValue(mockZipContents);
+            await handler.loadZip(new Blob(['zip']));
+        });
+
+        it('should track missing files', () => {
+            const url = handler.getMediaURL('missing.jpg');
+            expect(url).toBeNull();
+            expect(handler.missingFiles.has('missing.jpg')).toBe(true);
+        });
+
+        it('should not track existing files as missing', () => {
+            const url = handler.getMediaURL('photo1.jpg');
+            expect(url).toBe('blob:mock-url');
+            expect(handler.missingFiles.has('photo1.jpg')).toBe(false);
+        });
+
+        it('should warn when too many files are missing', () => {
+            spyOn(console, 'warn');
+            spyOn(window, 'alert');
+            
+            // Add many missing files
+            for (let i = 0; i < 10001; i++) {
+                handler.getMediaURL(`missing${i}.jpg`);
+            }
+            
+            expect(console.warn).toHaveBeenCalledWith(jasmine.stringContaining('10001'));
+            expect(window.alert).toHaveBeenCalledWith(jasmine.stringContaining('10001 media files are missing'));
+        });
+
+        it('should only alert once', () => {
+            spyOn(window, 'alert');
+            
+            // Add many missing files
+            for (let i = 0; i < 10005; i++) {
+                handler.getMediaURL(`missing${i}.jpg`);
+            }
+            
+            // Only one alert despite multiple files over threshold
+            expect(window.alert).toHaveBeenCalledTimes(1);
+        });
+
+        it('should not count missing files against LRU cache', () => {
+            // Add 3 real files to cache (max is 3)
+            handler.getMediaURL('photo1.jpg');
+            handler.getMediaURL('photo2.jpg');
+            
+            // Add missing file - should not affect cache
+            handler.getMediaURL('missing.jpg');
+            
+            // Now add a third real file
+            const mockZipContents = {
+                'chat.txt': new TextEncoder().encode('Chat'),
+                'photo1.jpg': new Uint8Array([1]),
+                'photo2.jpg': new Uint8Array([2]),
+                'photo3.jpg': new Uint8Array([3])
+            };
+            handler.mediaFiles.set('photo3.jpg', new Uint8Array([3]));
+            handler.getMediaURL('photo3.jpg');
+            
+            // All 3 real files should be in cache
+            expect(handler.urlCache.size).toBe(3);
+            expect(handler.missingFiles.size).toBe(1);
         });
     });
 

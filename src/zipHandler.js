@@ -66,9 +66,12 @@ export class ZipHandler {
         this.maxCacheSize = options.maxCacheSize || 50;
         this.urlCache = new LRUCache(this.maxCacheSize);
         this.mediaFiles = new Map(); // filename -> compressed data
+        this.missingFiles = new Set(); // Track files that don't exist
         this.chatContent = null;
         this.chatFilename = null;
         this.isLoaded = false;
+        this.missingFilesAlertThreshold = 10000;
+        this.hasAlertedMissingFiles = false;
     }
 
     /**
@@ -174,14 +177,36 @@ export class ZipHandler {
      * Get or create object URL for media file (with LRU caching)
      */
     getMediaURL(filename) {
-        if (!filename || !this.mediaFiles.has(filename)) {
+        if (!filename) {
             return null;
         }
 
-        // Check cache first
+        // Fast path: check if we know it's missing
+        if (this.missingFiles.has(filename)) {
+            return null;
+        }
+
+        // Check cache for existing blob URL
         const cached = this.urlCache.get(filename);
         if (cached) {
             return cached;
+        }
+
+        // Check if file exists
+        if (!this.mediaFiles.has(filename)) {
+            // Track missing file
+            this.missingFiles.add(filename);
+            
+            // Warn if too many missing files
+            if (this.missingFiles.size > this.missingFilesAlertThreshold && !this.hasAlertedMissingFiles) {
+                console.warn(`Large number of missing files detected: ${this.missingFiles.size}`);
+                if (typeof alert !== 'undefined') {
+                    alert(`Warning: ${this.missingFiles.size} media files are missing from the ZIP. The export might be incomplete or corrupted.`);
+                }
+                this.hasAlertedMissingFiles = true;
+            }
+            
+            return null;
         }
 
         // Create new blob URL
@@ -251,6 +276,7 @@ export class ZipHandler {
             cacheSize: this.urlCache.size,
             maxCacheSize: this.maxCacheSize,
             totalMedia: this.mediaFiles.size,
+            missingFiles: this.missingFiles.size,
             cacheUtilization: (this.urlCache.size / this.maxCacheSize) * 100
         };
     }
@@ -278,9 +304,11 @@ export class ZipHandler {
         
         // Clear all data
         this.mediaFiles.clear();
+        this.missingFiles.clear();
         this.chatContent = null;
         this.chatFilename = null;
         this.isLoaded = false;
+        this.hasAlertedMissingFiles = false;
     }
 
     /**
