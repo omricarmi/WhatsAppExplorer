@@ -1,5 +1,9 @@
 import { MediaHandler } from '../src/mediaHandler.js';
 
+console.log('========================================');
+console.log('MediaHandler Tests - Expected Console Errors:');
+console.log('- "Not allowed to load local resource: blob:mock-url" - Mock URLs in test elements');
+
 describe('MediaHandler', () => {
     let mediaHandler;
     let mockZipHandler;

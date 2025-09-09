@@ -1,5 +1,9 @@
 import { ZipHandler } from '../src/zipHandler.js';
 
+console.log('========================================');
+console.log('ZipHandler Tests - Expected Console Warnings:');
+console.log('- "Large number of missing files detected" - Testing alert threshold');
+
 describe('ZipHandler', () => {
     let handler;
     

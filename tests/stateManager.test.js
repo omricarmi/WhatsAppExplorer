@@ -1,5 +1,10 @@
 import { StateManager } from '../src/stateManager.js';
 
+console.log('========================================');
+console.log('StateManager Tests - Expected Console Errors:');
+console.log('- "Error in test:event subscriber" - Testing error handling');
+console.log('- "Failed to save state" - Testing storage errors');
+
 describe('StateManager', () => {
     let stateManager;
     let mockMessages;
