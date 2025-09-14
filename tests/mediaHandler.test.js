@@ -1,9 +1,5 @@
 import { MediaHandler } from '../src/mediaHandler.js';
 
-console.log('========================================');
-console.log('MediaHandler Tests - Expected Console Errors:');
-console.log('- "Not allowed to load local resource: blob:mock-url" - Mock URLs in test elements');
-
 describe('MediaHandler', () => {
     let mediaHandler;
     let mockZipHandler;
@@ -73,7 +69,8 @@ describe('MediaHandler', () => {
 
         it('should create image element', () => {
             mockZipHandler.hasMedia.and.returnValue(true);
-            mockZipHandler.getMediaURL.and.returnValue('blob:mock-url');
+            // Return a valid 1x1 transparent PNG data URL to avoid console errors
+            mockZipHandler.getMediaURL.and.returnValue('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
             
             const element = mediaHandler.createMediaElement('photo.jpg');
             
@@ -84,7 +81,8 @@ describe('MediaHandler', () => {
 
         it('should create video element', () => {
             mockZipHandler.hasMedia.and.returnValue(true);
-            mockZipHandler.getMediaURL.and.returnValue('blob:mock-url');
+            // Return a valid minimal video data URL to avoid console errors
+            mockZipHandler.getMediaURL.and.returnValue('data:video/mp4;base64,AAAAAA==');
             
             const element = mediaHandler.createMediaElement('video.mp4');
             
@@ -94,7 +92,8 @@ describe('MediaHandler', () => {
 
         it('should create audio element', () => {
             mockZipHandler.hasMedia.and.returnValue(true);
-            mockZipHandler.getMediaURL.and.returnValue('blob:mock-url');
+            // Return a valid minimal audio data URL to avoid console errors
+            mockZipHandler.getMediaURL.and.returnValue('data:audio/mp3;base64,/+MYxAAAAANIAAAAAExBTUUzLjk4LjIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
             
             const element = mediaHandler.createMediaElement('audio.mp3');
             
@@ -105,7 +104,8 @@ describe('MediaHandler', () => {
 
         it('should create document element', () => {
             mockZipHandler.hasMedia.and.returnValue(true);
-            mockZipHandler.getMediaURL.and.returnValue('blob:mock-url');
+            // Return a valid PDF data URL to avoid console errors
+            mockZipHandler.getMediaURL.and.returnValue('data:application/pdf;base64,JVBERi0xLg==');
             
             const element = mediaHandler.createMediaElement('document.pdf');
             
@@ -117,7 +117,8 @@ describe('MediaHandler', () => {
 
         it('should create generic file element for unknown types', () => {
             mockZipHandler.hasMedia.and.returnValue(true);
-            mockZipHandler.getMediaURL.and.returnValue('blob:mock-url');
+            // Return a valid data URL to avoid console errors
+            mockZipHandler.getMediaURL.and.returnValue('data:application/octet-stream;base64,AA==');
             
             const element = mediaHandler.createMediaElement('unknown.xyz');
             
@@ -154,7 +155,8 @@ describe('MediaHandler', () => {
     describe('Image Element Details', () => {
         it('should set lazy loading on images', () => {
             mockZipHandler.hasMedia.and.returnValue(true);
-            mockZipHandler.getMediaURL.and.returnValue('blob:mock-url');
+            // Return a valid image data URL to avoid console errors
+            mockZipHandler.getMediaURL.and.returnValue('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
             
             const element = mediaHandler.createMediaElement('photo.jpg');
             
@@ -164,7 +166,8 @@ describe('MediaHandler', () => {
         });
 
         it('should handle image load error', () => {
-            const container = mediaHandler.createImageElement('blob:mock-url', 'photo.jpg');
+            // Use an invalid data URL to trigger error
+            const container = mediaHandler.createImageElement('data:image/png;base64,invalid', 'photo.jpg');
             const img = document.createElement('img');
             
             // Simulate error
@@ -188,7 +191,8 @@ describe('MediaHandler', () => {
     describe('Video Element Details', () => {
         it('should create video without controls', () => {
             mockZipHandler.hasMedia.and.returnValue(true);
-            mockZipHandler.getMediaURL.and.returnValue('blob:mock-url');
+            // Return a valid video data URL to avoid console errors
+            mockZipHandler.getMediaURL.and.returnValue('data:video/mp4;base64,AAAAAA==');
             
             const element = mediaHandler.createMediaElement('video.mp4');
             
@@ -197,7 +201,8 @@ describe('MediaHandler', () => {
         });
 
         it('should add play button overlay', () => {
-            const container = mediaHandler.createVideoElement('blob:mock-url', 'video.mp4');
+            // Use a valid video data URL to avoid console errors
+            const container = mediaHandler.createVideoElement('data:video/mp4;base64,AAAAAA==', 'video.mp4');
             
             // Play button is created
             const playButton = document.createElement('div');
@@ -210,17 +215,20 @@ describe('MediaHandler', () => {
 
     describe('Audio Element Details', () => {
         it('should create audio with controls', () => {
-            const container = mediaHandler.createAudioElement('blob:mock-url', 'audio.mp3');
+            // Use a valid audio data URL to avoid console errors
+            const dataUrl = 'data:audio/mp3;base64,/+MYxAAAAANIAAAAAExBTUUzLjk4LjIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+            const container = mediaHandler.createAudioElement(dataUrl, 'audio.mp3');
             const audio = container.querySelector('audio');
             
             expect(audio).toBeTruthy();
             expect(audio.controls).toBe(true);
             expect(audio.preload).toBe('metadata');
-            expect(audio.src).toBe('blob:mock-url');
+            expect(audio.src).toBe(dataUrl);
         });
 
         it('should display filename label', () => {
-            const container = mediaHandler.createAudioElement('blob:mock-url', 'voice-note.opus');
+            // Use a valid audio data URL to avoid console errors
+            const container = mediaHandler.createAudioElement('data:audio/ogg;base64,T2dnUwACAAAAAAAAAAA=', 'voice-note.opus');
             const label = container.querySelector('.media-audio-label');
             
             expect(label.textContent).toBe('voice-note.opus');
@@ -229,19 +237,22 @@ describe('MediaHandler', () => {
 
     describe('Document Element Details', () => {
         it('should create download link', () => {
-            const container = mediaHandler.createDocumentElement('blob:mock-url', 'report.pdf', 'document');
+            // Use a valid PDF data URL to avoid console errors
+            const dataUrl = 'data:application/pdf;base64,JVBERi0xLg==';
+            const container = mediaHandler.createDocumentElement(dataUrl, 'report.pdf', 'document');
             const downloadLink = container.querySelector('.media-download');
             
             expect(downloadLink).toBeTruthy();
-            expect(downloadLink.getAttribute('href')).toBe('blob:mock-url');
+            expect(downloadLink.getAttribute('href')).toBe(dataUrl);
             expect(downloadLink.getAttribute('download')).toBe('report.pdf');
         });
 
         it('should use correct class for type', () => {
-            const docContainer = mediaHandler.createDocumentElement('blob:mock-url', 'file.pdf', 'document');
+            // Use valid data URLs to avoid console errors
+            const docContainer = mediaHandler.createDocumentElement('data:application/pdf;base64,JVBERi0xLg==', 'file.pdf', 'document');
             expect(docContainer.className).toBe('media-container media-document');
             
-            const fileContainer = mediaHandler.createDocumentElement('blob:mock-url', 'unknown.xyz', 'file');
+            const fileContainer = mediaHandler.createDocumentElement('data:application/octet-stream;base64,AA==', 'unknown.xyz', 'file');
             expect(fileContainer.className).toBe('media-container media-file');
         });
     });
@@ -249,7 +260,8 @@ describe('MediaHandler', () => {
     describe('Integration', () => {
         it('should check media existence before creating element', () => {
             mockZipHandler.hasMedia.and.returnValue(true);
-            mockZipHandler.getMediaURL.and.returnValue('blob:mock-url');
+            // Use a valid data URL to avoid console errors
+            mockZipHandler.getMediaURL.and.returnValue('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==');
             
             mediaHandler.createMediaElement('photo.jpg');
             

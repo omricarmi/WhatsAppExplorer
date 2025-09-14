@@ -1,10 +1,5 @@
 import { StateManager } from '../src/stateManager.js';
 
-console.log('========================================');
-console.log('StateManager Tests - Expected Console Errors:');
-console.log('- "Error in test:event subscriber" - Testing error handling');
-console.log('- "Failed to save state" - Testing storage errors');
-
 describe('StateManager', () => {
     let stateManager;
     let mockMessages;
@@ -92,6 +87,8 @@ describe('StateManager', () => {
         });
 
         it('should handle subscriber errors gracefully', () => {
+            spyOn(console, 'error'); // Suppress console.error output
+            
             const goodCallback = jasmine.createSpy('goodCallback');
             const badCallback = jasmine.createSpy('badCallback').and.throwError('Test error');
             
@@ -103,6 +100,7 @@ describe('StateManager', () => {
             }).not.toThrow();
             
             expect(goodCallback).toHaveBeenCalled();
+            expect(console.error).toHaveBeenCalled(); // Verify error was logged
         });
     });
 
@@ -267,10 +265,12 @@ describe('StateManager', () => {
         });
 
         it('should handle storage errors gracefully', () => {
+            spyOn(console, 'error'); // Suppress console.error output
             localStorage.setItem.and.throwError('Storage full');
             
             const result = stateManager.saveToStorage();
             expect(result).toBe(false);
+            expect(console.error).toHaveBeenCalled(); // Verify error was logged
         });
     });
 

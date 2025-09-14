@@ -1,9 +1,5 @@
 import { ZipHandler } from '../src/zipHandler.js';
 
-console.log('========================================');
-console.log('ZipHandler Tests - Expected Console Warnings:');
-console.log('- "Large number of missing files detected" - Testing alert threshold');
-
 describe('ZipHandler', () => {
     let handler;
     
@@ -19,7 +15,8 @@ describe('ZipHandler', () => {
         }
         
         // Mock URL.createObjectURL and revokeObjectURL
-        spyOn(URL, 'createObjectURL').and.returnValue('blob:mock-url');
+        // Return a valid data URL to avoid console errors
+        spyOn(URL, 'createObjectURL').and.returnValue('data:application/octet-stream;base64,AA==');
         spyOn(URL, 'revokeObjectURL');
     });
 
@@ -216,7 +213,7 @@ describe('ZipHandler', () => {
 
         it('should create object URL for existing media', () => {
             const url = handler.getMediaURL('photo.jpg');
-            expect(url).toBe('blob:mock-url');
+            expect(url).toBe('data:application/octet-stream;base64,AA==');
             expect(URL.createObjectURL).toHaveBeenCalled();
         });
 
@@ -343,13 +340,13 @@ describe('ZipHandler', () => {
 
         it('should not track existing files as missing', () => {
             const url = handler.getMediaURL('photo1.jpg');
-            expect(url).toBe('blob:mock-url');
+            expect(url).toBe('data:application/octet-stream;base64,AA==');
             expect(handler.missingFiles.has('photo1.jpg')).toBe(false);
         });
 
         it('should warn when too many files are missing', () => {
-            spyOn(console, 'warn');
-            spyOn(window, 'alert');
+            spyOn(console, 'warn'); // Suppress console.warn output
+            spyOn(window, 'alert'); // Suppress alert popup
             
             // Add many missing files
             for (let i = 0; i < 10001; i++) {
@@ -361,7 +358,8 @@ describe('ZipHandler', () => {
         });
 
         it('should only alert once', () => {
-            spyOn(window, 'alert');
+            spyOn(console, 'warn'); // Suppress console.warn output
+            spyOn(window, 'alert'); // Suppress alert popup
             
             // Add many missing files
             for (let i = 0; i < 10005; i++) {
